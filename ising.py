@@ -55,7 +55,7 @@ n = 10
 
 pas = 0.01
 
-iteration = 5000
+iteration = 500
 
 nbrsimulation=10
 
