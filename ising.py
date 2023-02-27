@@ -47,15 +47,16 @@ class IsingModel:
 
             Y=[i for i in range(len(E))]
             plt.plot(Y, E)
+            print(self.signage(position))
         plt.show()
-
+        
 # Utilisation de la classe IsingModel
 
 n = 20
 
 pas = 0.01
 
-iteration = 5000
+iteration = 10000
 
 nbrsimulation=10
 I=np.eye((n))
