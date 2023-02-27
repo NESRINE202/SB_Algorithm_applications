@@ -18,7 +18,13 @@ class IsingModel:
         return np.dot(t1, np.dot(self.M, t1))
     
     def force(self, t, i):
-        sign=lambda x: int(x>0)-int(x<0)
+        def sign(x):
+            criteremin=1 #on pourra changer sa
+            if abs(x)<criteremin:
+                return x/criteremin
+            else:
+                return int(x>0)-int(x<0)
+        
         f = -sum([self.M[i,j]*sign(t[j] )for j in range(self.n)]+[self.M[i,i]*sign(t[i])])
         return f
 
@@ -53,11 +59,11 @@ class IsingModel:
         
 # Utilisation de la classe IsingModel
 
-n = 20
+n = 10
 
-pas = 0.01
+pas = 0.001
 
-iteration = 5000
+iteration = 100000
 
 nbrsimulation=10
 I=np.eye((n))
