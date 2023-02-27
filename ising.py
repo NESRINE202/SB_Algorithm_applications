@@ -16,9 +16,10 @@ class IsingModel:
     def calcule_energie(self, t):
         t1 = self.signage(t)
         return np.dot(t1, np.dot(self.M, t1))
-
+    
     def force(self, t, i):
-        f = -sum([self.M[i,j]*t[j] for j in range(self.n)]+[self.M[i,i]*t[i]])
+        sign=lambda x: int(x>0)-int(x<0)
+        f = -sum([self.M[i,j]*sign(t[j] )for j in range(self.n)]+[self.M[i,i]*sign(t[i])])
         return f
 
     def nouvelle_variable(self, t, vitesse):
@@ -56,7 +57,7 @@ n = 20
 
 pas = 0.01
 
-iteration = 10000
+iteration = 5000
 
 nbrsimulation=10
 I=np.eye((n))
