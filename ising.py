@@ -51,14 +51,14 @@ class IsingModel:
 
 # Utilisation de la classe IsingModel
 
-n = 10
+n = 20
 
 pas = 0.01
 
 iteration = 5000
 
 nbrsimulation=10
-
+I=np.eye((n))
 M=np.zeros((n,n))
 for i in range(n):
             for j in range(i+1):
