@@ -2,8 +2,11 @@ import numpy as np
 import random as rd
 import matplotlib.pyplot as plt
 import copy
-from matrice import M
-from matrice import H
+
+from matrice import M,H,n,pas,iteration,nbrsimulation
+
+
+
 class IsingModel:
     def __init__(self, n, pas, iteration,M,H,nbrsimulation):
         #n nombre de particule
@@ -67,24 +70,6 @@ class IsingModel:
         
 # Utilisation de la classe IsingModel
 print("je commence")
-n = 10
-
-pas = 0.001
-
-iteration = 10000
-
-nbrsimulation=15
-H=np.zeros(n)
-I=np.eye((n))
-M=np.zeros((n,n))
-for i in range(n):
-            for j in range(i+1):
-                c = rd.randint(0,9)
-                M[i,j] = c
-                M[j,i] = c
-                
-for i in range(n):
-    H[i]=rd.randint(0,1)
 
 ising_model = IsingModel(n, pas, iteration,M,H,nbrsimulation)
 ising_model.simulate()
