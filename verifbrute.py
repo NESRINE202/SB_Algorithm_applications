@@ -1,5 +1,6 @@
-from matrice import M, H, n, pas, iteration, nbrsimulation
+from matrice import n, pas, iteration, nbrsimulation
 import numpy as np
+from ising import M,H
 
 
 def decimal_to_binary(k, n): #retourne une liste de longuer n (nombre de particule) avec des 1 et des -1 
@@ -21,6 +22,7 @@ best_t1 = [0] * n
 min_value=calculeforce(M,best_t1)
 
 for i in range(2 ** n):
+    print(i)
     t1 = decimal_to_binary(i, n)
     m = np.dot(t1, np.dot(M, t1))
     if m < min_value:

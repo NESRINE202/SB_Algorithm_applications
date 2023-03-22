@@ -32,15 +32,22 @@ class IsingModel:
         
         f = -sum([self.M[i,j]*sign(t[j] )for j in range(self.n)]+[self.H[i]*sign(t[i])])
         return f
+
+######### parti a revoir #######################################################
     
     def nouvelle_variable(self, t, vitesse):
+        def parametrecontrol(t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
+            return 0  #fonction par hazard
+        
         # c'est pour calculer la nouvelle position de la particule
         t1 = copy.deepcopy(t)
         v = copy.deepcopy(vitesse)
         for i in range(self.n):
-            v[i] = v[i] + self.pas * self.force(t, i)
+            v[i] = v[i]*(1-parametrecontrol(i)) + self.pas * self.force(t, i)
             t1[i] = t1[i] + self.pas * v[i]
         return t1, v
+    
+##################################################################################
 
     def signage(self, t):
         # donne le signe de chaque particule
@@ -48,7 +55,6 @@ class IsingModel:
 
         
     def simulate(self):
-        
         
         for i in range(self.nbrsimulation):
             position=[rd.randint(0,1)*2-1 for i in range(self.n)]
