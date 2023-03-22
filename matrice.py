@@ -1,10 +1,10 @@
 import numpy as np
 import random as rd
 
-n = 15
+n = 28
 pas = 0.001
 iteration = 10000
-nbrsimulation=15
+nbrsimulation=28
 M=np.zeros((n,n))
 for i in range(n):
             for j in range(i+1):

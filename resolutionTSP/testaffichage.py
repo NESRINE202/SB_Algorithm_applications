@@ -8,7 +8,7 @@ G.add_node(3)
 G.add_edge(2,3,weight=1)
 G.add_node(1)
 G.add_edge(2,1,weight=1)
-print(G.neighbors(2),G.nodes(),G.edges())
+print(G.nodes(),G.edges())
 G.add_edge(1,3)
 
 nx.draw(G)
