@@ -44,7 +44,7 @@ class IsingModel:
         def parametrecontrol(t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
             return 0 #fonction par hazard
         def temperature(t): #fonction pour donner la fluctuation du a la variation de temperature
-            return 0.1
+            return 0.2*np.exp(-t/np.sqrt(self.iteration))-0.1
         
         # c'est pour calculer la nouvelle position de la particule
         X1 = copy.deepcopy(X)
