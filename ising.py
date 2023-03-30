@@ -32,8 +32,9 @@ class IsingModel:
                 return x/criteremin
             else:
                 return int(x>0)-int(x<0)
+            
+        f=-np.dot(M[i,:],X)-H[i]*X[i]
         
-        f = -sum([self.M[i,j]*sign(X[j] )for j in range(self.n)]+[self.H[i]*sign(X[i])])
         return f
 
 ######### parti a revoir #######################################################
@@ -42,7 +43,7 @@ class IsingModel:
         def parametrecontrol(t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
             return 0 #fonction par hazard
         def temperature(t): #fonction pour donner la fluctuation du a la variation de temperature
-            return 0.1
+            return 0.01
         # c'est pour calculer la nouvelle position de la particule
         X1 = copy.deepcopy(X)
         v = copy.deepcopy(vitesse)
@@ -77,7 +78,7 @@ class IsingModel:
             
             
             ### affichage
-            Y=[i for i in range(len(E))]
+            Y=np.arange(len(E))
             plt.plot(Y, E)
             print(self.signage(position))
             

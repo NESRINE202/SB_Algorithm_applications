@@ -1,16 +1,15 @@
 from matrice import n, pas, iteration, nbrsimulation
 import numpy as np
 from ising import M,H
+import ising_copy
 
 
-def decimal_to_binary(k, n): #retourne une liste de longuer n (nombre de particule) avec des 1 et des -1 
-    #k c'est l ordre de la configurationet on a 2**n configuration total 
-    # c'est du binaire mais avc des -1 a la place des 0
-    binary = []
-    while k > 0:
-        binary = [2*(k % 2)-1] + binary
-        k //= 2
-    return (n - len(binary)) * [-1] + binary
+def decimal_to_binary(k, n):
+    # Return a list of length n with 1's and -1's representing the binary digits of k
+    binary_str = format(k, 'b').zfill(n)
+    
+    return [-1 if bit == '0' else 1 for bit in binary_str]
+
 
 
 def calculeforce(M,X):# calcue l'energie avec une configuration donnéé en t
@@ -19,7 +18,7 @@ def calculeforce(M,X):# calcue l'energie avec une configuration donnéé en t
 
 # parcour tt les cas pour avoir le min
 
-best_t1 = [0] * n
+best_t1 = [-1] * n
 min_value=calculeforce(M,best_t1)
 
 
