@@ -10,7 +10,7 @@ from matrice import M,H,n,pas,iteration,nbrsimulation
 class IsingModel:
     def __init__(self, n, pas, iteration,M,H,nbrsimulation):
         #n nombre de particule
-        #M matrice des forces d'interactio,
+        #M matrice des forces d'interaction,
         self.n = n
         self.pas = pas
         self.iteration = iteration
