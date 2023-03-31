@@ -2,7 +2,7 @@ import numpy as np
 import random as rd
 import matplotlib.pyplot as plt
 import copy
-
+import time
 from matrice import M,H,n,pas,iteration,nbrsimulation
 
 
