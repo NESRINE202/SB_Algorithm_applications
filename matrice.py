@@ -1,7 +1,7 @@
 import numpy as np
 import random as rd
 
-n = 2
+n = 10
 pas = 0.001
 iteration = 10000
 nbrsimulation=n
