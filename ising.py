@@ -61,7 +61,6 @@ class IsingModel:
     
        
     def simulate(self):
-        
         for i in range(self.nbrsimulation):
             
             position=[rd.randint(0,1)*2-1 for i in range(self.n)] # retourne une liste de 1 et -1 aleatoire
