@@ -87,8 +87,7 @@ class IsingModel:
         
 # Utilisation de la classe IsingModel
 print("je commence")
-start_time=time.time()
+
 ising_model = IsingModel(n, pas, iteration,M,H,nbrsimulation)
 ising_model.simulate()
-end_time=time.time()
-print(-start_time+end_time)
+
