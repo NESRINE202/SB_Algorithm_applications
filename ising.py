@@ -2,7 +2,7 @@ import numpy as np
 import random as rd
 import matplotlib.pyplot as plt
 import copy
-
+import time
 from matrice import M,H,n,pas,iteration,nbrsimulation
 
 
@@ -79,14 +79,16 @@ class IsingModel:
             
             ### affichage
             Y=[i for i in range(len(E))]
-            plt.plot(Y, E)
+            #plt.plot(Y, E)
             print(self.signage(position))
             
-        plt.show()
+        #plt.show()
 
         
 # Utilisation de la classe IsingModel
 print("je commence")
-
+start_time=time.time()
 ising_model = IsingModel(n, pas, iteration,M,H,nbrsimulation)
 ising_model.simulate()
+end_time=time.time()
+print(-start_time+end_time)
