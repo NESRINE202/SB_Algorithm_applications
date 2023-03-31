@@ -40,6 +40,7 @@ class IsingModel:
 ######### parti a revoir #######################################################
     
     def nouvelle_variable(self, X, vitesse, t):
+        
         def parametrecontrol(t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
             return 0 #fonction par hazard
         def temperature(t): #fonction pour donner la fluctuation du a la variation de temperature
@@ -81,7 +82,9 @@ class IsingModel:
             Y=np.arange(len(E))
             plt.plot(Y, E)
             print(self.signage(position))
-            
+        plt.title("niveau d'$é$n$é$rgie")    
+        plt.xlabel("temps")
+        plt.ylabel("E")
         plt.show()
 
         

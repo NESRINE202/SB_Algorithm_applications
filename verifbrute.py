@@ -1,7 +1,7 @@
 from matrice import n, pas, iteration, nbrsimulation
 import numpy as np
 from ising import M,H
-import ising_copy
+#import ising_copy
 
 
 def decimal_to_binary(k, n):
