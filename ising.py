@@ -31,21 +31,20 @@ class IsingModel:
             if abs(x)<criteremin:
                 return x/criteremin
             else:
-                return int(x>0)-int(x<0)
-            
+                return int(x>0)-int(x<0)   
         f=-np.dot(M[i,:],X)-H[i]*X[i]
-        
+    
         return f
 
-######### parti a revoir #######################################################
+################################################################
     
     def nouvelle_variable(self, X, vitesse, t):
         
-        def parametrecontrol(t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
-            return 0 #fonction par hazard
+        def parametrecontrol(t): #a(t) dans le document thermal
+            return 0 #fonction a definir
         def temperature(t): #fonction pour donner la fluctuation du a la variation de temperature
             return 0.01
-        # c'est pour calculer la nouvelle position de la particule
+        #calculer la nouvelle position de la particule
         X1 = copy.deepcopy(X)
         v = copy.deepcopy(vitesse)
         for i in range(self.n):
@@ -65,8 +64,8 @@ class IsingModel:
         
         for i in range(self.nbrsimulation):
             
-            position=[rd.randint(0,1)*2-1 for i in range(self.n)] # retourne une liste de 1 et -1 aleatoire
-            vitesse=[0]*self.n
+            position=np.array([rd.randint(0,1)*2-1 for i in range(self.n)]) # retourne une liste de 1 et -1 aleatoire
+            vitesse=np.array([0]*self.n)
             
             E=[]    
             for t in range(self.iteration):
