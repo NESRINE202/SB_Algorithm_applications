@@ -50,7 +50,7 @@ def Tracage_bifurcation(delta, phi0, M, K, T, N):
     P = [p(t) for t in Temps ]
     E = [calcul_energie(X,Y,k) for k in range(N+1)]
 
-    #plt.plot(Temps,P,label='P(t)')
+    plt.plot(Temps,P,label='P(t)')
     #plt.plot(Temps,E,label ='E(t)')
     plt.plot(Temps, X[:,1],label = 'X2(t)')  # plot the first column of X
     plt.plot(Temps,X[:,0],label='X1(t)')
