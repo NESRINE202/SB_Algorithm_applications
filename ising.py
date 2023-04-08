@@ -1,11 +1,8 @@
 import numpy as np
-import random as rd
 import matplotlib.pyplot as plt
-import copy
+import time
 
-from matrice import M,H,n,pas,iteration,n_cond_init
-
-
+from matrice import M, H, n, pas, iteration, n_cond_init
 
 class IsingModel:
     def __init__(self, n_part, pas, iteration,M,H,n_cond_init):
@@ -19,75 +16,65 @@ class IsingModel:
         self.H=H
         self.n_cond_init=n_cond_init
 
-    def calcule_energie(self, X):
-        X1 = self.signage(X)
-        return np.dot(X1, np.dot(self.M, X1))+np.dot(H,X1)
-    
-    
-    def force(self, X, i):
-        
-        ####fonction pour limiter les amplitudes des X (paroi inelastique)
-        def sign(x):
-            criteremin=1 #on pourra changer
-            if abs(x)<criteremin:
-                return x/criteremin
-            else:
-                return int(x>0)-int(x<0)
-            
-        f=-np.dot(M[i,:],X)-H[i]*X[i]
-        
-        return f
-
     
     def a(self, t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
         return 0 #fonction par hazard
 
     def temperature(self, t): #fonction pour donner la fluctuation du a la variation de temperature
         return 0.01
-
-    # fonction de mise a jour des variables positions et vitesses
-    def simplectic_update(self, X, V, t):
-
-        forces = -np.dot(M, X)+H*X
-
-        V = V * (1-self.a(t) + self.pas * self.temperature(t)) + self.pas * forces
-        X = X + self.pas * V
-
-        return X, V
-
-    def signage(self, X):
-        # donne le signe de chaque particule
-        return [1 if X[i]>0 else -1 for i in range(self.n_part)]
     
-    def simulate(self):
+    def simplectic_update_forall_simulations(self, positions, speeds, t):
+        # states of shape (n_cond_init, n_particles, 2)
+
+        # updating the speeds
+        forces = -np.dot(M, positions.T).T+H*positions
+        speeds = speeds * (1-self.a(t) + self.pas * self.temperature(t))
+        speeds = speeds + self.pas * forces
+
+        # updating the positions
+        positions = positions + self.pas * speeds
         
-        for i in range(self.n_cond_init):
-            
-            position=np.array([rd.randint(0,1)*2-1 for i in range(self.n_part)]) # retourne une liste de 1 et -1 aleatoire
-            vitesse=np.array([0]*self.n_part)
-            
-            E=[]
-            for t in range(self.iteration):
-                
-                #calcule de l'energie de l'etat suivant
-                E.append(self.calcule_energie(self.signage(position)))
-                
-                #calcule de l'etat suivant
-                position, vitesse = self.simplectic_update(position, vitesse,t)
-            
-            
-            ### affichage
-            Y=np.arange(len(E))
-            plt.plot(Y, E)
-            print(self.signage(position))
+        return positions, speeds
+
+    def simulate(self):
+        # création des tenseurs
+        # cf. détails en photo jointe pour la compréhention de la forme
+        states = np.zeros(shape=(self.n_cond_init, self.n_part, self.iteration, 2)) 
+        energies = np.zeros(shape=(self.n_cond_init, self.iteration))
+
+        # attribution des conditions initiales
+        states[:, :, 0, 0] = np.random.randint(low=0, high=2, size=(self.n_cond_init, self.n_part)) * 2 - 1 # spins initiaux randoms dans {-1, +1}
+
+        print('Simulating model...')
+        start_time=time.time()
+
+        # itération
+        for t in range(1, self.iteration):
+            # positions et vitesses pour toutes les conditions initiales a l'instant t
+            prev_positions, prev_speeds = states[:, :, t-1, 0], states[:, :, t-1, 1]
+            states[:, :, t, 0], states[:, :, t, 1] = self.simplectic_update_forall_simulations(prev_positions, prev_speeds, t) # current_positions, current_speeds
+            current_positions = states[:, :, t, 0]
+
+            # calcul des énergies
+            signed_positions = np.where(current_positions>0, 1, -1)
+            current_energies = np.sum(signed_positions @ M * signed_positions, axis=1) + H @ signed_positions.T # 1d array containing the energies for all the initial conditions
+            energies[:, t] = current_energies
+
+        # Affichage des résultats
+        end_time=time.time()
+        elapsed = end_time-start_time
+        print(f"Done! Simlation finished in {elapsed:.2f} seconds")
+
+        abcisses = np.arange(iteration)
+        for i in range(n_cond_init):
+            plt.plot(abcisses, energies[i])
+
         plt.title("niveau d'$é$n$é$rgie")    
         plt.xlabel("temps")
         plt.ylabel("E")
         plt.show()
 
         
-# Utilisation de la classe IsingModel
-print("je commence")
-
-ising_model = IsingModel(n, pas, iteration,M,H,n_cond_init)
-ising_model.simulate()
+if __name__ == "__main__":
+    ising_model = IsingModel(n, pas, iteration,M,H,n_cond_init)
+    ising_model.simulate()
