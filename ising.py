@@ -64,17 +64,44 @@ class IsingModel:
         end_time=time.time()
         elapsed = end_time-start_time
         print(f"Done! Simlation finished in {elapsed:.2f} seconds")
-
-        abcisses = np.arange(iteration)
-        for i in range(n_cond_init):
-            plt.plot(abcisses, energies[i])
-
-        plt.title("niveau d'$é$n$é$rgie")    
-        plt.xlabel("temps")
-        plt.ylabel("E")
-        plt.show()
-
         
+        return states, energies
+
+    
+    # Returns the solution energy, the corresponding spin configuration and the index of the simulation that reached that energy
+    def extract_solution(self):
+        mins_indexes = np.argmin(energies, axis=1)
+        solution_energy = np.min(energies)
+        simulaiton_solution_index = 0
+
+        for i in range(len(mins_indexes)):
+            iteration_index = mins_indexes[i]
+            if energies[i, iteration_index] == solution_energy:
+                simulaiton_solution_index = i
+
+        min_coord = simulaiton_solution_index, mins_indexes[simulaiton_solution_index]
+
+        spin_configuration = np.where(states>0, 1, -1)
+        spin_configuration = spin_configuration[min_coord[0], :, min_coord[1], 0]
+        spin_configuration = spin_configuration.flatten()
+
+        return solution_energy, spin_configuration, simulaiton_solution_index
+
+    
 if __name__ == "__main__":
-    ising_model = IsingModel(n, pas, iteration,M,H,n_cond_init)
-    ising_model.simulate()
+    ising_model = IsingModel(n, pas, iteration, M, H, n_cond_init)
+    states, energies = ising_model.simulate()
+
+    solution_energy, spin_configuration, simulaiton_solution_index = ising_model.extract_solution()
+    print(f"Minimum energy reached across all the simulations: {solution_energy}.")
+    print(f"The first simulation to reach that energy was simulation number {simulaiton_solution_index+1}.")
+    print(f"The corresponding spin configuration is: {spin_configuration}")
+
+    abcisses = np.arange(iteration)
+    for i in range(n_cond_init):
+        plt.plot(abcisses, energies[i])
+
+    plt.title("niveau d'$é$n$é$rgie")    
+    plt.xlabel("temps")
+    plt.ylabel("E")
+    plt.show()

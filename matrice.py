@@ -1,7 +1,7 @@
 import numpy as np
 import random as rd
 
-n = 100
+n = 30
 pas = 0.001
 iteration = 10000
 n_cond_init=n
