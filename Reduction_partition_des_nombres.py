@@ -1,5 +1,4 @@
 import numpy as np 
-from ising import *
 
 class Sac():
     def __init__(self,capacite,signe) -> None:
@@ -21,10 +20,10 @@ class Reduction():
         self.Sacs = Sacs #un tableau qui contient la capcité de chaque sac 
 
 
-    def reduction(self): 
+    def reduction_f(self): 
         # construction de la Matrice J du modèle d'ising 
-        n = len(self.Nombres_item)
-        J= np.zeros(n,n)
+        n = self.Nombres_item
+        J= np.zeros([n,n])
         for i in range(n): 
             for j in range(n): 
                 if i != j : 
@@ -32,27 +31,29 @@ class Reduction():
                     J[j,i]= J[i,j]
                 else:
                     J[i,i]=0
-        self.J = J 
-
-
-    def partition(self): 
-        #l'algorithme de bifuraction à implementer 
-        repartition = IsingModel.simulate()
-        # Je suppose ici que Simulate retourne un tableau d'un signe qui correspond a chacun des sac qui tient compte des deux sac 
-        # on peut faire la somme des poids et prendre deux qui ont le mem poids 
+        return J 
     
-        self.repartition = repartition 
 
-                
+print("nombres_Items = ")
+Nombres_Items = 10
+#definition of the items and building the matrix Items 
+Items = np.zeros(Nombres_Items)
+c = 0
+for i in range(Nombres_Items):
+    print("weight of Item ",i)
+    weight=float(input())
+    Items[i]=weight
+    c += weight
+C1 = c/2
+C2=C1
+Sac_1 = Sac(C1,1)
+Sac_2 = Sac(C2,-1)
+Sacs = [C1,C2]
+reduction = Reduction(Nombres_Items,Items,Sacs)
+J=reduction.reduction_f()
+ 
 
 
+    
 
-
-
-# def main():
-
-
-
-# if __name__ == "__main__":
-     #main()    
           

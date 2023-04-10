@@ -3,7 +3,7 @@ import random as rd
 import matplotlib.pyplot as plt
 import copy
 
-from matrice import M,H,n,pas,iteration,nbrsimulation
+from Reduction_partition_des_nombres import*
 
 
 
@@ -84,16 +84,22 @@ class IsingModel:
             
             
             ### affichage
-            Y=[i for i in range(len(E))]
-            plt.plot(Y, E)
+            #Y=[i for i in range(len(E))]
+            #plt.plot(Y, E)
             #print(self.signage(position))
-        print ("s= ", s)
+        #print ("s= ", s)
             
-        plt.show()
+        #plt.show()
+        return s
 
         
 # Utilisation de la classe IsingModel
-print("je commence")
-
-ising_model = IsingModel(n, pas, iteration,M,H,nbrsimulation)
-ising_model.simulate()
+#print("je commence")
+H=np.zeros(Nombres_Items)
+for i in range(Nombres_Items):
+    H[i]=rd.randint(0,1)
+pas = 0.001
+iteration = 10000
+nbrsimulation = Nombres_Items
+ising_model = IsingModel(Nombres_Items, pas, iteration,J,H,nbrsimulation)
+s=ising_model.simulate()
