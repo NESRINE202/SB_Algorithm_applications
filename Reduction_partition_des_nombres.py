@@ -4,6 +4,14 @@ class Sac():
     def __init__(self,capacite,signe) -> None:
         self.capacite = capacite 
         self.signe = signe # correpond au code donne si on choisi le premier ou le deuxime sac
+    def content_s(self,Items,signe):
+        content =np.zeros(len(Items))
+        for i in range(len(Items)):
+            if Items[i]==signe:
+                content[i] = i + 1 
+        return content
+
+
 
 class Item(): 
     def __init__(self,poids) -> None:
