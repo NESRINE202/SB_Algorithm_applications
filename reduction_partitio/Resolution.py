@@ -1,5 +1,5 @@
-from ising import *
-from Reduction_partition_des_nombres import *
+from reduction_partitio.ising import *
+from reduction_partitio.Reduction_partition_des_nombres import *
 import numpy as np 
 
 def main():

@@ -1,6 +1,6 @@
-from matrice import n, pas, iteration, nbrsimulation
+from reduction_partitio.matrice import n, pas, iteration, nbrsimulation
 import numpy as np
-from ising import M,H
+from reduction_partitio.ising import M,H
 
 
 

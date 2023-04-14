@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-from matrice import M, H, n, pas, iteration, n_cond_init
+from reduction_partitio.matrice import M, H, n, pas, iteration, n_cond_init
 
 class IsingModel:
     def __init__(self, n_part, pas, iteration,M,H,n_cond_init):
