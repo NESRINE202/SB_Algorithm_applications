@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-from matrice import M, H, n, pas, iteration, n_cond_init
+from matrice import n, pas, iteration, n_cond_init, generate_instance
 
 class IsingModel:
     def __init__(self, n_part, pas, iteration,M,H,n_cond_init):
@@ -27,7 +27,7 @@ class IsingModel:
         # states of shape (n_cond_init, n_particles, 2)
 
         # updating the speeds
-        forces = -np.dot(M, positions.T).T+H*positions
+        forces = -np.dot(self.M, positions.T).T+self.H*positions
         speeds = speeds * (1-self.a(t) + self.pas * self.temperature(t))
         speeds = speeds + self.pas * forces
 
@@ -45,9 +45,6 @@ class IsingModel:
         # attribution des conditions initiales
         states[:, :, 0, 0] = np.random.randint(low=0, high=2, size=(self.n_cond_init, self.n_part)) * 2 - 1 # spins initiaux randoms dans {-1, +1}
 
-        print('Simulating model...')
-        start_time=time.time()
-
         # itération
         for t in range(1, self.iteration):
             # positions et vitesses pour toutes les conditions initiales a l'instant t
@@ -57,42 +54,28 @@ class IsingModel:
 
             # calcul des énergies
             signed_positions = np.where(current_positions>0, 1, -1)
-            current_energies = np.sum(signed_positions @ M * signed_positions, axis=1) + H @ signed_positions.T # 1d array containing the energies for all the initial conditions
+            current_energies = np.sum(signed_positions @ self.M * signed_positions, axis=1) + self.H @ signed_positions.T # 1d array containing the energies for all the initial conditions
             energies[:, t] = current_energies
-
-        # Affichage des résultats
-        end_time=time.time()
-        elapsed = end_time-start_time
-        print(f"Done! Simlation finished in {elapsed:.2f} seconds")
         
         return states, energies
 
-    
-    # Returns the solution energy, the corresponding spin configuration and the index of the simulation that reached that energy
-    def extract_solution(self):
-        mins_indexes = np.argmin(energies, axis=1)
-        solution_energy = np.min(energies)
-        simulaiton_solution_index = 0
 
-        for i in range(len(mins_indexes)):
-            iteration_index = mins_indexes[i]
-            if energies[i, iteration_index] == solution_energy:
-                simulaiton_solution_index = i
 
-        min_coord = simulaiton_solution_index, mins_indexes[simulaiton_solution_index]
-
-        spin_configuration = np.where(states>0, 1, -1)
-        spin_configuration = spin_configuration[min_coord[0], :, min_coord[1], 0]
-        spin_configuration = spin_configuration.flatten()
-
-        return solution_energy, spin_configuration, simulaiton_solution_index
-
-    
 if __name__ == "__main__":
-    ising_model = IsingModel(n, pas, iteration, M, H, n_cond_init)
-    states, energies = ising_model.simulate()
+    # little example to showcase what it can do
 
-    solution_energy, spin_configuration, simulaiton_solution_index = ising_model.extract_solution()
+    from performence_analysis import extract_solution
+
+    M, H = generate_instance()
+    ising_model = IsingModel(n, pas, iteration, M, H, n_cond_init)
+    print("Simulating")
+    start_time =time.time()
+    states, energies = ising_model.simulate()
+    stop_time = time.time()
+    print("Done.")
+    print(f"Elapse: {stop_time-start_time} seconds")
+
+    solution_energy, spin_configuration, simulaiton_solution_index = extract_solution(states, energies)
     print(f"Minimum energy reached across all the simulations: {solution_energy}.")
     print(f"The first simulation to reach that energy was simulation number {simulaiton_solution_index+1}.")
     print(f"The corresponding spin configuration is: {spin_configuration}")
