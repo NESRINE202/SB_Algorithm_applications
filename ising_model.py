@@ -60,7 +60,6 @@ class IsingModel:
         return states, energies
 
 
-
 if __name__ == "__main__":
     import instance_genrerantion
     from results_annalysis import plot_energies_evolution
