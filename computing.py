@@ -21,7 +21,7 @@ def compute_single_instance(instance_size, step, n_itterations, n_cond_init):
     filename = f"{instance_size}_{step}_{n_itterations}_{n_cond_init}_{datestr}.npz"
     np.savez(f'computing_results/{filename}', J=J, H=H, states=states, energies=energies)
 
-    return states, energies
+    return states, energies, filename
 
 if __name__ == '__main__':
     compute_single_instance(instance_size=20, step=0.001, n_itterations=10000, n_cond_init=20)
