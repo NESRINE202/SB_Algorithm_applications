@@ -45,6 +45,18 @@ def plot_energies_hist(energies):
 
     plt.show()
 
+# Histogram of the normalized difference between the global minimum nad minimum energies reached by each simulation
+def plot_diff_norm_energies_hist(energies):
+    minimums = energies.min(axis=1)
+    m = min(minimums)
+    y_values = np.array(abs((m-minimums)/m))
+    plt.hist(y_values)
+    plt.xlabel("normalized difference of energy with the global minimu")
+    plt.ylabel("Number of simulations")
+    plt.title("the normalized difference between the global minimum and minimum energies reached by each simulation")
+
+    plt.show()
+
 # Returns the solution energy, the corresponding spin configuration and the index of the simulation that reached that energy
 def extract_full_solution(states, energies):
     mins_indexes = np.argmin(energies, axis=1)
