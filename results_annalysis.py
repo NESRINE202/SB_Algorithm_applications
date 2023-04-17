@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from instance_genrerantion import n, pas, iteration, n_cond_init, generate_instance
+from instance_genrerantion import generate_instance
 from ising_model import IsingModel
 import time
 
@@ -8,6 +8,7 @@ import time
 
 # HOW TO IMPLEMET NEW PLOTS: Build a function of (states, energies) that ends in some sort of plt.show(), then run this function from the if __name__ == "__main__"
 
+# Open the results of a simulation saved in a file
 def open_results(path):
     # unpack the parameters used for the simulation
     instance_size, step, n_itterations, n_cond_init = path[18:].split('_')[:-1]
@@ -15,25 +16,33 @@ def open_results(path):
     # load and unpack the datas
     data = np.load(path)
     J, H = data['J'], data['H']
-    states, energies = data['states'], data['eneries']
+    states, energies = data['states'], data['energies']
 
     return states, energies
 
 # energies evolution
-def plot_eneries_evolution(states, energies):
+def plot_energies_evolution(energies):
     n_cond_init = len(energies)
     n_iterration = len(energies[0])
     abcisses = np.arange(n_iterration)
-    for i in range():
+
+    for i in range(n_cond_init):
         plt.plot(abcisses, energies[i])
+
+    plt.xlabel("Iteration number")
+    plt.ylabel("Energy level")
+    plt.title("Energy level evolution for each of the simulations")
 
     plt.show()
 
 # Histogram of the minimum energies reached by each simulation
-def plot_energies_hist(states, energies):
-
+def plot_energies_hist(energies):
     minimums = energies.min(axis=1)
     plt.hist(minimums)
+    plt.xlabel("Minimum of energy reached by each simulation")
+    plt.ylabel("Number of simulations")
+    plt.title("Energies reached by the simulations")
+
     plt.show()
 
 # Returns the solution energy, the corresponding spin configuration and the index of the simulation that reached that energy
