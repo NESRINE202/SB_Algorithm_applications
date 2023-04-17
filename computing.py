@@ -6,10 +6,7 @@ import datetime
 # This file is for doing the actual simulation and saving the results to be latter annalysed
 
 # compute for a sigle instance
-def compute_single_instance(instance_size, step, n_itterations, n_cond_init):
-    # generate the instance
-    J, H = instance_genrerantion.generate_instance(instance_size)
-
+def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H):
     # run the algorithm
     ising_model = IsingModel(step, n_itterations, n_cond_init, J, H)
     states, energies = ising_model.simulate()
@@ -19,9 +16,10 @@ def compute_single_instance(instance_size, step, n_itterations, n_cond_init):
     now = datetime.datetime.now()
     datestr = now.strftime("%d%m%Y-%H%M")
     filename = f"{instance_size}_{step}_{n_itterations}_{n_cond_init}_{datestr}.npz"
-    np.savez(f'computing_results/{filename}', J=J, H=H, states=states, energies=energies)
+    path = f'computing_results/{filename}'
+    np.savez(path, J=J, H=H, states=states, energies=energies)
 
-    return states, energies, filename
+    return states, energies, path
 
 if __name__ == '__main__':
     compute_single_instance(instance_size=20, step=0.001, n_itterations=10000, n_cond_init=20)
