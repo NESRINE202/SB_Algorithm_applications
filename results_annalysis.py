@@ -48,8 +48,8 @@ def plot_energies_hist(energies):
 # Histogram of the normalized difference between the global minimum nad minimum energies reached by each simulation
 def plot_diff_norm_energies_hist(energies):
     minimums = energies.min(axis=1)
-    min = min(minimums)
-    y_values = np.array(abs((min-minimums)/min))
+    m = min(minimums)
+    y_values = np.array(abs((m-minimums)/m))
     plt.hist(y_values)
     plt.xlabel("normalized difference of energy with the global minimu")
     plt.ylabel("Number of simulations")
