@@ -73,6 +73,7 @@ class IsingModel:
         plt.xlabel("temps")
         plt.ylabel("E")
         plt.show()
+        return energies
 
         
 if __name__ == "__main__":
