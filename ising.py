@@ -2,7 +2,7 @@ import numpy as np
 import random as rd
 import matplotlib.pyplot as plt
 import copy
-import time
+
 from matrice import M,H,n,pas,iteration,nbrsimulation
 
 
@@ -10,7 +10,7 @@ from matrice import M,H,n,pas,iteration,nbrsimulation
 class IsingModel:
     def __init__(self, n, pas, iteration,M,H,nbrsimulation):
         #n nombre de particule
-        #M matrice des forces d'interaction,
+        #M matrice des forces d'interactio,
         self.n = n
         self.pas = pas
         self.iteration = iteration
@@ -18,72 +18,59 @@ class IsingModel:
         self.H=H
         self.nbrsimulation=nbrsimulation
 
-    def calcule_energie(self, X):
-        X1 = self.signage(X)
-        return np.dot(X1, np.dot(self.M, X1))+np.dot(H,X1)
+    def calcule_energie(self, t):
+        t1 = self.signage(t)
+        return np.dot(t1, np.dot(self.M, t1))
     
-    
-    def force(self, X, i):
-        
-        ####fonction pour limiter les amplitudes des X (paroi inelastique)
+    def force(self, t, i):
         def sign(x):
             criteremin=1 #on pourra changer
             if abs(x)<criteremin:
                 return x/criteremin
             else:
-                return int(x>0)-int(x<0)   
-        f=-np.dot(M[i,:],X)-H[i]*X[i]
-    
+                return int(x>0)-int(x<0)
+        
+        f = -sum([self.M[i,j]*sign(t[j] )for j in range(self.n)]+[self.H[i]*sign(t[i])])
         return f
 
-################################################################
+######### parti a revoir #######################################################
     
-    def nouvelle_variable(self, X, vitesse, t):
+    def nouvelle_variable(self, t, vitesse):
+        def parametrecontrol(t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
+            return 0  #fonction par hazard
         
-        def parametrecontrol(t): #a(t) dans le document thermal
-            return 0 #fonction a definir
-        def temperature(t): #fonction pour donner la fluctuation du a la variation de temperature
-            return 0.01
-        #calculer la nouvelle position de la particule
-        X1 = copy.deepcopy(X)
+        # c'est pour calculer la nouvelle position de la particule
+        t1 = copy.deepcopy(t)
         v = copy.deepcopy(vitesse)
         for i in range(self.n):
-            v[i] = v[i]*(1-parametrecontrol(i)) + self.pas * (self.force(X, i) + temperature(t)*v[i])
-            X1[i] = X1[i] + self.pas * v[i]
-        return X1, v
+            v[i] = v[i]*(1-parametrecontrol(i)) + self.pas * self.force(t, i)
+            t1[i] = t1[i] + self.pas * v[i]
+        return t1, v
     
 ##################################################################################
 
-    def signage(self, X):
+    def signage(self, t):
         # donne le signe de chaque particule
-        return [1 if X[i]>0 else -1 for i in range(self.n)]
+        return [1 if t[i]>0 else -1 for i in range(self.n)]
 
-    
-       
+        
     def simulate(self):
         
         for i in range(self.nbrsimulation):
-            
-            position=np.array([rd.randint(0,1)*2-1 for i in range(self.n)]) # retourne une liste de 1 et -1 aleatoire
-            vitesse=np.array([0]*self.n)
-            
+            position=[rd.randint(0,1)*2-1 for i in range(self.n)]
+            vitesse=[0]*self.n
+            posparhistorique=[[k] for k in position]
             E=[]    
-            for t in range(self.iteration):
-                
-                #calcule de l'energie de l'etat suivant
+            for a in range(self.iteration):
                 E.append(self.calcule_energie(self.signage(position)))
-                
-                #calcule de l'etat suivant
-                position, vitesse = self.nouvelle_variable(position, vitesse,t)
+                position, vitesse = self.nouvelle_variable(position, vitesse)
+                for j in range(len(posparhistorique)):
+                    posparhistorique[j].append(position[j])
             
-            
-            ### affichage
-            Y=np.arange(len(E))
+            Y=[i for i in range(len(E))]
             plt.plot(Y, E)
             print(self.signage(position))
-        plt.title("niveau d'$é$n$é$rgie")    
-        plt.xlabel("temps")
-        plt.ylabel("E")
+            
         plt.show()
 
         
