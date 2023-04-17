@@ -1,7 +1,9 @@
 import numpy as np
+import time 
 
 #import ising_copy
 def verif_function(M,H):
+    temps_1 = time.perf_counter()
     n=M.shape[0]
     def calcule_energie(M,H,t):
         return np.dot(t,np.dot(M,t)) +np.dot(H,t)
@@ -24,17 +26,15 @@ def verif_function(M,H):
 # parcour tt les cas pour avoir le min
 
     best_t1 = [-1] * n
-    min_value=calcule_energie(M,best_t1)
+    min_value=calcule_energie(M,H,best_t1)
 
 
     for i in range(2 ** n):
         t1 = decimal_to_binary(i, n)
-        m = calcule_energie(M,t1)
+        m = calcule_energie(M,H,t1)
         if m < min_value:
             min_value = m
             best_t1 = t1
+    temps_2 = time.perf_counter()
 
-    print(best_t1)
-    print(min_value)
-
-    
+    return min_value, temps_2-temps_1
