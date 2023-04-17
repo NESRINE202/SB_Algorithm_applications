@@ -1,4 +1,4 @@
-from matrice import n, pas, iteration, nbrsimulation
+from matrice import n, pas, iteration
 import numpy as np
 from ising import M,H
 #import ising_copy
@@ -21,21 +21,25 @@ energies = np.dot(configurations, np.dot(M, configurations.T)).diagonal() + np.d
 
 # parcour tt les cas pour avoir le min
 
-best_t1 = [-1] * n
-min_value=calculeforce(M,best_t1)
+def calculeforce(M,t):
+    return np.dot(np.dot(t,M),np.transpose(t))
 
 
-for i in range(2 ** n):
-    t1 = decimal_to_binary(i, n)
-    m = calculeforce(M,t1)
-    if m < min_value:
-        min_value = m
-        best_t1 = t1
+def veri(n,M):
+    best_t1 = [-1] * n
 
-print(best_t1)
-print(min_value)
-print("M=",M)
-print("H=",H)
+    min_value=calculeforce(M,best_t1)
+
+
+    for i in range(2 ** n):
+        t1 = decimal_to_binary(i, n)
+        m = calculeforce(M,t1)
+        if m < min_value:
+            min_value = m
+            best_t1 = t1
+    return min_value
+
+
 
 
     

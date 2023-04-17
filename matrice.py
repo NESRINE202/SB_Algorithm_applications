@@ -1,10 +1,10 @@
 import numpy as np
 import random as rd
 
-n = 100
+n = 15
 pas = 0.001
 iteration = 10000
-n_cond_init= 100
+n_cond_init= 200
 M=np.zeros((n,n))
 
 for i in range(n):

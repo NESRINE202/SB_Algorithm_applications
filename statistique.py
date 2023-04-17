@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 from ising import *
+from verifbrute import *
 
 
 def trace_histo(y_value):
-    plt.hist(y_value,bins=11)
+    plt.hist(y_value,bins=7)
     plt.show()
 
 ising_model = IsingModel(n, pas, iteration,M,H,n_cond_init)
