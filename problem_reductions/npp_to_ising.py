@@ -15,3 +15,10 @@ def ising_to_npp(spins, partition):
     partition_2 = partition[indixes_set_2]
 
     return partition_1, partition_2
+
+# returns the cost function from a given solution
+def configuration_to_cost(spins, partition):
+    partition_1, partition_2 = ising_to_npp(spins, partition)
+    cost = np.abs(partition_1.sum() - partition_2.sum())
+
+    return cost
