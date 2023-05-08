@@ -35,6 +35,20 @@ def plot_energies_evolution(energies):
 
     plt.show()
 
+def plot_min_energy_evolution(energies):
+    n_iterration = len(energies[0])
+    abcisses = np.arange(n_iterration)
+
+    min_energies = energies.min(axis=0)
+
+    plt.plot(abcisses, min_energies)
+
+    plt.xlabel("Iteration number")
+    plt.ylabel("Minum of energy reached at itteration $t$")
+    plt.title("Evolution of the minimum of energy reached across all simulations.")
+
+    plt.show()
+
 # Histogram of the minimum energies reached by each simulation
 def plot_energies_hist(energies):
     minimums = energies.min(axis=1)
@@ -42,6 +56,18 @@ def plot_energies_hist(energies):
     plt.xlabel("Minimum of energy reached by each simulation")
     plt.ylabel("Number of simulations")
     plt.title("Energies reached by the simulations")
+
+    plt.show()
+
+# Histogram of the normalized difference between the global minimum nad minimum energies reached by each simulation
+def plot_diff_norm_energies_hist(energies):
+    minimums = energies.min(axis=1)
+    m = min(minimums)
+    y_values = np.array(abs((m-minimums)/m))
+    plt.hist(y_values)
+    plt.xlabel("normalized difference of energy with the global minimu")
+    plt.ylabel("Number of simulations")
+    plt.title("the normalized difference between the global minimum and minimum energies reached by each simulation")
 
     plt.show()
 
