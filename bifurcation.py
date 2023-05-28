@@ -1,15 +1,32 @@
 import numpy as np 
 import matplotlib.pyplot as plt
-from matrice import M, n  
 import random as rd 
 
-def p(t):
+# defining a Matrix 
+def generate_random_matrix(dim):
+    matrix = np.random.rand(dim, dim)
+    return matrix
+
+M = np.array([[0,1],[1,0]])
+
+def p1(t):
     if t<100:
         return 0
     elif t<400:
         return 0.01*t 
     else : 
         return 4
+    
+def P2(t):
+   return np.log(t +1)
+
+def P3(t): 
+    return np.exp(0.01 * t)
+
+def P4(t): 
+    return t ** 0.05
+
+
    
 
 def Tracage_bifurcation(delta, phi0, M, K, T, N):
@@ -34,8 +51,8 @@ def Tracage_bifurcation(delta, phi0, M, K, T, N):
         """Calculate the sum of the k-th column of X array."""
         return np.sum(X[k,:])
             
-    def contrainte(x):
-            criteremin= 1 #on pourra changer
+    def contrainte(x,criteremin):
+            #criteremin= 1 #on pourra changer
             if abs(x)<criteremin:
                 return x/criteremin
             else:
@@ -43,14 +60,14 @@ def Tracage_bifurcation(delta, phi0, M, K, T, N):
     for i in range(n):
         X[0, i] = rd.random()
         for k in range(N):
-            X[k+1,i] =  contrainte(X[k,i] + h * delta * Y[k,i] )
-            Y[k+1,i] = Y[k,i] - h * ((K * X[k,i]**2 - p(k*h) + delta) * X[k,i] + phi0 * calculate_sum_of_column(X,k))
+            X[k+1,i] =  X[k,i] + h * delta * Y[k,i] 
+            Y[k+1,i] = Y[k,i] - h * ((K * X[k,i]**2 - p1(k*h) + delta) * X[k,i] + phi0 * calculate_sum_of_column(X,k))
     
     Temps = np.linspace(0, T, N+1)  # fix the linspace call
-    P = [p(t) for t in Temps ]
+    P = [p1(t) for t in Temps ]
     E = [calcul_energie(X,Y,k) for k in range(N+1)]
 
-    plt.plot(Temps,P,label='P(t)')
+   # plt.plot(Temps,P,label='P(t)')
     #plt.plot(Temps,E,label ='E(t)')
     plt.plot(Temps, X[:,1],label = 'X2(t)')  # plot the first column of X
     plt.plot(Temps,X[:,0],label='X1(t)')
@@ -67,7 +84,7 @@ def Tracage_bifurcation(delta, phi0, M, K, T, N):
 
 #test pour x1
 #il faut voir a quoi correspond les delta , k , phi 0 
-N = 1000
+N = 2
 delta = 0.5
 phi0 = 0.1
 K = 1
