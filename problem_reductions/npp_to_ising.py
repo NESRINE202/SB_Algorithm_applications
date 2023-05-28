@@ -2,7 +2,8 @@ import numpy as np
 
 # Creating the interation matrix from a given NPP instance
 def npp_to_ising(weights):
-    J = -np.outer(weights, weights)
+    J = np.outer(weights, weights)
+    np.fill_diagonal(J, 0)
     H = np.zeros(len(weights))
     return J, H
 

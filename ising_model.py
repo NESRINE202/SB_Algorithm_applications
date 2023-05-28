@@ -49,7 +49,9 @@ class IsingModel:
         for t in range(1, self.iteration):
             # positions et vitesses pour toutes les conditions initiales a l'instant t
             prev_positions, prev_speeds = states[:, :, t-1, 0], states[:, :, t-1, 1]
-            states[:, :, t, 0], states[:, :, t, 1] = self.simplectic_update_forall_simulations(prev_positions, prev_speeds, t) # current_positions, current_speeds
+            signed_prev_positions = np.where(prev_positions>1, 1, prev_positions)
+            signed_prev_positions = np.where(prev_positions<-1, -1, signed_prev_positions)
+            states[:, :, t, 0], states[:, :, t, 1] = self.simplectic_update_forall_simulations(signed_prev_positions, prev_speeds, t) # current_positions, current_speeds
             current_positions = states[:, :, t, 0]
 
             # calcul des énergies
