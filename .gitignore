@@ -2,4 +2,4 @@
 *.pyc
 *.npz
 computing_results/
-graph_visualization/
+graph_visualisation/
