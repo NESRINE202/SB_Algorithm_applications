@@ -21,7 +21,7 @@ class IsingModel:
     
     # Default a and temperature functions
     def default_a(self, t):
-        return 1 
+        return 0 
 
     def default_temperature(self, t):
         return 0
