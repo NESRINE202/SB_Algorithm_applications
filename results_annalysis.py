@@ -35,6 +35,20 @@ def plot_energies_evolution(energies):
 
     plt.show()
 
+def plot_speeds_evolution(states):
+    speeds = states[:, :, :, 2]
+    n_cond_init, _,  n_iterration = speeds.shape 
+    abcisses = np.arange(n_iterration)
+
+    for i in range(n_cond_init):
+        plt.plot(abcisses, speeds[i])
+
+    plt.xlabel("Iteration number")
+    plt.ylabel("Particle speed")
+    plt.title("Energy level evolution for each of the simulations")
+
+    plt.show()
+
 def plot_min_energy_evolution(energies):
     n_iterration = len(energies[0])
     abcisses = np.arange(n_iterration)
