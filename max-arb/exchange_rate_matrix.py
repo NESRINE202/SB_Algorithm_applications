@@ -54,6 +54,6 @@ def exchange_rate_matrix():
                     exchange_rate_matrix[i, j] = exchange_rates[forward_pair]
 
     # Throw away the ones in the diagonal because they mean nothing
-    np.fill_diagonal(exchange_rate_matrix, np.nan)
+    # np.fill_diagonal(exchange_rate_matrix, np.nan)
     
     return exchange_rate_matrix, coins
