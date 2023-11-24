@@ -5,17 +5,17 @@ import time
 # This file creats the IsingModel class
 
 class IsingModel:
-    def __init__(self, pas, iteration, n_cond_init, J, H, custom_temperature=None, custom_a=None):
+    def __init__(self, step, iteration, n_cond_init, J, H, custom_temperature=None, custom_a=None):
         # n nombre de particule
         # J matrice des forces d'interaction
         # n_cond_init, nombres de conditions initiales différentes
         self.n_part = len(J)
-        self.pas = pas
         self.iteration = iteration
         self.J =J
         self.H=H
         self.temperature_func = custom_temperature if custom_temperature is not None else self.default_temperature
         self.a_func = custom_a if custom_a is not None else self.default_a
+        self.step = step if callable(step) else (lambda self, t: step)
         self.n_cond_init=n_cond_init
 
     
@@ -25,7 +25,7 @@ class IsingModel:
 
     def default_temperature(self, t):
         return 0
-    
+
     # a and temparature functions callers
     def a(self, t):
         return self.a_func(self, t)
@@ -38,11 +38,11 @@ class IsingModel:
 
         # updating the speeds
         forces = -np.dot(self.J, positions.T).T+self.H*positions
-        speeds = speeds * (1-self.a(t) + self.pas * self.temperature(t))
-        speeds = speeds + self.pas * forces
+        speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
+        speeds = speeds + self.step(self, t) * forces
 
         # updating the positions
-        positions = positions + self.pas * speeds
+        positions = positions + self.step(self, t) * speeds
         
         return positions, speeds
 
