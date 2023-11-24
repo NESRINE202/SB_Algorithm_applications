@@ -5,7 +5,7 @@ import time
 # This file creats the IsingModel class
 
 class IsingModel:
-    def __init__(self, pas, iteration, n_cond_init, J, H):
+    def __init__(self, pas, iteration, n_cond_init, J, H, custom_temperature=None, custom_a=None):
         # n nombre de particule
         # J matrice des forces d'interaction
         # n_cond_init, nombres de conditions initiales différentes
@@ -14,14 +14,24 @@ class IsingModel:
         self.iteration = iteration
         self.J =J
         self.H=H
+        self.temperature_func = custom_temperature if custom_temperature is not None else self.default_temperature
+        self.a_func = custom_a if custom_a is not None else self.default_a
         self.n_cond_init=n_cond_init
 
     
-    def a(self, t): #a(t) dans le document thermal mais je n'ai aps encore compris l'utilite
-        return 0 #fonction par hazard
+    # Default a and temperature functions
+    def default_a(self, t):
+        return 0 
 
-    def temperature(self, t): #fonction pour donner la fluctuation du a la variation de temperature
-        return 0.01
+    def default_temperature(self, t):
+        return 0
+    
+    # a and temparature functions callers
+    def a(self, t):
+        return self.a_func(self, t)
+    
+    def temperature(self, t):
+        return self.temperature_func(self, t)
     
     def simplectic_update_forall_simulations(self, positions, speeds, t):
         # states of shape (n_cond_init, n_particles, 2)

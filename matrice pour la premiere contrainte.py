@@ -59,19 +59,14 @@ def transaction_fract(matr):
     return np.array(l)
 
 
-if __name__=="__main__":
-
+def usage(lambda1,lambda2,n,matr):
     
-    def usage(lambda1,lambda2,n,matr):
-        
-        Contrainte1M=matrice_Ci(n)+matrice_Cj(n)-2*matrice_Cj1j2(n)
-        Contrainte2M=matrice_Ci(n)
-        
-        print("M=",-lambda1*Contrainte1M-lambda2*Contrainte2M)
-        
-        print("H=",transaction_fract(matr)-lambda2*one(n))
-        
-    epsilon=0.01
-    matr=np.array([[1,1.1,0.8,1-epsilon],[1/1.1-epsilon,1,0.9,1/0.9-epsilon],[1/0.8-epsilon,1/0.9-epsilon,1,1.1],[1,0.9,1/1.1-epsilon,1]])
-    print(usage(1,2,4,matr))
-                   
+    Contrainte1M=matrice_Ci(n)+matrice_Cj(n)-2*matrice_Cj1j2(n)
+    Contrainte2M=matrice_Ci(n)
+    
+    return -lambda1*Contrainte1M-lambda2*Contrainte2M, transaction_fract(matr)-lambda2*one(n)
+    
+epsilon=0.01
+matr=np.array([[1,1.1,0.8,1-epsilon],[1/1.1-epsilon,1,0.9,1/0.9-epsilon],[1/0.8-epsilon,1/0.9-epsilon,1,1.1],[1,0.9,1/1.1-epsilon,1]])
+print(usage(1,2,4,matr))
+                
