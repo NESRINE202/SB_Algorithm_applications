@@ -1,5 +1,6 @@
 # *.ipynb
 *.pyc
 *.npz
+*.icloud
 computing_results/
 graph_visualisation/
