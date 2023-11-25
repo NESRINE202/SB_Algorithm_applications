@@ -37,7 +37,7 @@ class IsingModel:
         # states of shape (n_cond_init, n_particles, 2)
 
         # updating the speeds
-        forces = -np.dot(self.J, positions.T).T+self.H*positions
+        forces = -np.dot(self.J, positions.T).T-self.H
         speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
         speeds = speeds + self.step(self, t) * forces
 
@@ -65,7 +65,9 @@ class IsingModel:
             current_positions = states[:, :, t, 0]
 
             # calcul des énergies
-            signed_positions = np.where(current_positions>0, 1, -1)
+            # signed_positions = np.where(current_positions>0, 1, -1)
+            signed_positions = np.where(current_positions>1, 1, current_positions)
+            signed_positions = np.where(current_positions<-1, -1, signed_positions)
             current_energies = np.sum(signed_positions @ self.J * signed_positions, axis=1) + self.H @ signed_positions.T # 1d array containing the energies for all the initial conditions
             energies[:, t] = current_energies
         
