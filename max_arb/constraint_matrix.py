@@ -57,6 +57,7 @@ def transaction_fract(matr):
         l.extend(row[:i])
         l.extend(row[i+1:])
     return np.array(l)
+
 def usage(lambda1,lambda2,n,matr):
         
         Contrainte1M=matrice_Ci(n)+matrice_Cj(n)-2*matrice_Cj1j2(n)
