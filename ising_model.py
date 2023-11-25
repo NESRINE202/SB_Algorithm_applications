@@ -20,10 +20,10 @@ class IsingModel:
 
     
     # Default a and temperature functions
-    def default_a(self, t):
+    def default_a(self, t, _):
         return 0 
 
-    def default_temperature(self, t):
+    def default_temperature(self, t, _):
         return 0
 
     # a and temparature functions callers
@@ -43,6 +43,14 @@ class IsingModel:
 
         # updating the positions
         positions = positions + self.step(self, t) * speeds
+
+        # Blocking the particles between -1 and +1:
+        positions = np.where(positions>=1, 1, positions)
+        positions = np.where(positions<=-1, -1, positions)
+
+        # Blocking the speeds is the particles are against the wall
+        speeds = np.where(positions==1, 0, speeds)
+        speeds = np.where(positions==-1, 0, speeds)
         
         return positions, speeds
 
@@ -59,11 +67,7 @@ class IsingModel:
         for t in range(1, self.iteration):
             # positions et vitesses pour toutes les conditions initiales a l'instant t
             prev_positions, prev_speeds = states[:, :, t-1, 0], states[:, :, t-1, 1]
-            signed_prev_positions = np.where(prev_positions>1, 1, prev_positions)
-            signed_prev_positions = np.where(prev_positions<-1, -1, signed_prev_positions)
-            signed_prev_speed = np.where(prev_speeds>1, 1, prev_speeds)
-            signed_prev_speed = np.where(prev_speeds<-1, -1, signed_prev_speed)
-            states[:, :, t, 0], states[:, :, t, 1] = self.simplectic_update_forall_simulations(signed_prev_positions, prev_speeds, t) # current_positions, current_speeds
+            states[:, :, t, 0], states[:, :, t, 1] = self.simplectic_update_forall_simulations(prev_positions, prev_speeds, t) # current_positions, current_speeds
             current_positions = states[:, :, t, 0]
 
             # calcul des énergies  ####### calcule de l'energie n'a pas de sens avec des x variable je pense
