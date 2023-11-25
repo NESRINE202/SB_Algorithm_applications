@@ -8,7 +8,7 @@ def check_valid_solution(X, exchange_rate_matrix):
     E = len(exchange_rate_matrix[~np.isnan(exchange_rate_matrix)])
 
     # First check: the right size
-    if len(X) != V**2:
+    if len(X) != V**2-V:
         raise ValueError(f"Decison vector does not have the right shape: lengh of {len(X)} and should be {V**2}")
 
     # Match the shape of X with the exchange rate matrix
