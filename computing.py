@@ -22,6 +22,3 @@ def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, 
         np.savez(path, J=J, H=H, states=states, energies=energies)
 
     return states, energies, path
-
-if __name__ == '__main__':
-    compute_single_instance(instance_size=20, step=0.001, n_itterations=10000, n_cond_init=20)
