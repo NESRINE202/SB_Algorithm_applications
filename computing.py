@@ -6,10 +6,10 @@ import datetime
 # This file is for doing the actual simulation and saving the results to be latter annalysed
 
 # compute for a sigle instance
-def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H, temperature=None, a=None, savetofile=True):
+def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H, temperature=None, a=None, savetofile=True, stopping_criterion=0):
     # run the algorithm
-    ising_model = IsingModel(step, n_itterations, n_cond_init, J, H, temperature, a)
-    states, energies = ising_model.simulate()
+    ising_model = IsingModel(step, n_itterations, n_cond_init, J, H, temperature, a, stopping_criterion=stopping_criterion)
+    states, energies, biffurcation_rate = ising_model.simulate()
 
     # Save all the data (parameters, instance, results) inside of a file
     # Contains the parameters, the instance matrix and the states and enrgies matrices
@@ -21,4 +21,4 @@ def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, 
         path = f'computing_results/{filename}'
         np.savez(path, J=J, H=H, states=states, energies=energies)
 
-    return states, energies, path
+    return states, energies, biffurcation_rate, path

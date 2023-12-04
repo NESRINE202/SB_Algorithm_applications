@@ -5,12 +5,14 @@ import time
 # This file creats the IsingModel class
 
 class IsingModel:
-    def __init__(self, step, iteration, n_cond_init, J, H, custom_temperature=None, custom_a=None):
+    def __init__(self, step, iteration, n_cond_init, J, H, custom_temperature=None, custom_a=None, stopping_criterion=0):
         # n nombre de particule
         # J matrice des forces d'interaction
         # n_cond_init, nombres de conditions initiales différentes
+        # stopping_criterion, % of particles that need to have bifurcated before stopping the algorithm
         self.n_part = len(J)
         self.iteration = iteration
+        self.stopping_criterion = stopping_criterion
         self.J =J
         self.H=H
         self.temperature_func = custom_temperature if custom_temperature is not None else self.default_temperature
@@ -59,6 +61,7 @@ class IsingModel:
         # cf. détails en photo jointe pour la compréhention de la forme
         states = np.zeros(shape=(self.n_cond_init, self.n_part, self.iteration, 2)) 
         energies = np.zeros(shape=(self.n_cond_init, self.iteration))
+        biffurcation_rate = np.ones(shape=(self.iteration))
 
         # attribution des conditions initiales
         states[:, :, 0, 0] = np.random.randint(low=0, high=2, size=(self.n_cond_init, self.n_part)) * 2 - 1 # spins initiaux randoms dans {-1, +1}
@@ -76,7 +79,16 @@ class IsingModel:
             current_energies = np.sum(new_signed_pos @ self.J * new_signed_pos, axis=1) + self.H @ new_signed_pos.T # 1d array containing the energies for all the initial conditions
             energies[:, t] = current_energies
         
-        return states, energies
+            # Global stoping criterion
+            positions, speeds = states[:, :, t, 0], states[:, :, t, 1]
+            mask = (positions != -1) & (positions != 1) & (speeds != 0)
+            number_of_parts_affected = len(positions[mask])
+            biffurcation_rate[t] = number_of_parts_affected/(self.n_part * self.n_cond_init)
+
+            if biffurcation_rate[t] <= self.stopping_criterion:
+                return states[:, :, :t, :], energies[:, :t], biffurcation_rate[:t]
+
+        return states, energies, biffurcation_rate
 
 
 if __name__ == "__main__":
