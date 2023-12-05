@@ -6,9 +6,9 @@ import datetime
 # This file is for doing the actual simulation and saving the results to be latter annalysed
 
 # compute for a sigle instance
-def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H, temperature=None, a=None, savetofile=True, stopping_criterion=0):
+def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H, temperature=None, a=None, savetofile=True, stopping_criterion=0, save_history=True):
     # run the algorithm
-    ising_model = IsingModel(step, n_itterations, n_cond_init, J, H, temperature, a, stopping_criterion=stopping_criterion)
+    ising_model = IsingModel(step, n_itterations, n_cond_init, J, H, temperature, a, stopping_criterion=stopping_criterion, save_history=save_history)
     states, energies, biffurcation_rate = ising_model.simulate()
 
     # Save all the data (parameters, instance, results) inside of a file
