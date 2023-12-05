@@ -112,6 +112,7 @@ class IsingModel:
             # 2D here because we only save the last states 
             current_state = np.zeros(shape=(self.n_cond_init, self.n_part, 2))
             current_state[:, :, 0] = np.random.randint(0, 2, size=(self.n_cond_init, self.n_part)) * 2 - 1
+            min_energies = np.zeros(shape=(self.iteration))
 
             # Iterrate over time
             for t in range(1, self.iteration):
@@ -127,7 +128,9 @@ class IsingModel:
                 #----------------------------------
                 new_signed_pos = np.where(prev_positions > 0, 1, -1)
                 current_energies = np.sum(new_signed_pos @ self.J * new_signed_pos, axis=1) + self.H @ new_signed_pos.T
-                energies[:, t] = current_energies
+                current_min_energy = current_energies.min()
+                min_energies[t] = current_min_energy
+                # energies[:, t] = current_energies
 
                 #--------------------------
                 # Global stoping criterion
@@ -140,6 +143,6 @@ class IsingModel:
 
                 # Stop the algorithm if the stopping criterion is reached
                 if biffurcation_rate[t] <= self.stopping_criterion:
-                    return current_state, energies[:, :t], biffurcation_rate[:t]
+                    return current_state, min_energies[:t], biffurcation_rate[:t]
             
-            return current_state, energies, biffurcation_rate
+            return current_state, min_energies, biffurcation_rate
