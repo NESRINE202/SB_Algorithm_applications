@@ -92,7 +92,7 @@ class IsingModel:
                 #--------------------------
                 # Count the number of particles (over all simulations), that have not yet bifurcated
                 positions, speeds = (states[:, :, t, 0], states[:, :, t, 1])
-                mask = (positions != -1) & (positions != 1) & (speeds != 0)
+                mask = ((positions != -1) | (positions != 1)) & (speeds != 0)
                 number_of_parts_affected = len(positions[mask])
                 biffurcation_rate[t] = number_of_parts_affected / (self.n_part * self.n_cond_init)
 
