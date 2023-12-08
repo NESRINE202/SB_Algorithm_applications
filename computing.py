@@ -9,7 +9,7 @@ import datetime
 def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H, temperature=None, a=None, savetofile=True, stopping_criterion=0, save_history=True):
     # run the algorithm
     ising_model = IsingModel(step, n_itterations, n_cond_init, J, H, temperature, a, stopping_criterion=stopping_criterion, save_history=save_history)
-    states, energies, biffurcation_rate = ising_model.simulate()
+    states, energies, last_energies, biffurcation_rate = ising_model.simulate()
 
     # Save all the data (parameters, instance, results) inside of a file
     # Contains the parameters, the instance matrix and the states and enrgies matrices
@@ -21,4 +21,4 @@ def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, 
         path = f'computing_results/{filename}'
         np.savez(path, J=J, H=H, states=states, energies=energies)
 
-    return states, energies, biffurcation_rate, path
+    return states, energies, last_energies, biffurcation_rate, path

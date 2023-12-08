@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from multiprocessing import Pool
+from joblib import Parallel, delayed
 
 # This file creats the IsingModel class
 
@@ -43,7 +45,24 @@ class IsingModel:
         # states of shape (n_cond_init, n_particles, 2)
 
         # updating the speeds
-        forces = -np.dot(self.J, positions.T).T -self.H
+        forces = -np.dot(self.J, positions.T).T - self.H
+        speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
+        speeds = speeds + self.step(self, t) * forces + (-1 + self.temperature(t) - np.square(positions))*positions
+
+        # updating the positions
+        positions = positions + self.step(self, t) * speeds
+
+        # Implementing the walls at -1 and +1
+        positions = np.clip(positions, -1, 1)
+        speeds = np.where((positions == 1) | (positions == -1), 0, speeds)
+        
+        return positions, speeds
+    
+    def simplectic_update_forall_simulations_parallel(self, positions, speeds, t):
+        # states of shape (n_cond_init, n_particles, 2)
+
+        # updating the speeds
+        forces = -parallel_multiply(self.J, positions) - self.H
         speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
         speeds = speeds + self.step(self, t) * forces
 
@@ -55,6 +74,8 @@ class IsingModel:
         speeds = np.where((positions == 1) | (positions == -1), 0, speeds)
         
         return positions, speeds
+    
+
     
     def simulate(self):
         energies = np.zeros(shape=(self.n_cond_init, self.iteration))
@@ -69,7 +90,11 @@ class IsingModel:
             #----------------------------------
             # 3D here because we save the state at each iteration
             states = np.zeros(shape=(self.n_cond_init, self.n_part, self.iteration, 2))
-            states[:, :, 0, 0] = np.random.randint(0, 2, size=(self.n_cond_init, self.n_part)) * 2 - 1
+            # states[:, :, 0, 0] = np.random.randint(0, 2, size=(self.n_cond_init, self.n_part)) * 2 - 1
+            states[:, :, 0, 0] = np.random.uniform(-1, 1, size=(self.n_cond_init, self.n_part))
+            # states[:, :, 0, 0] = np.random.normal(0, 0.0001, size=(self.n_cond_init, self.n_part))
+            # states[:, :, 0, 0] = np.clip(states[:, :, 0, 0], -1, 1)
+            # states[:, :, 0, 0] = np.zeros(shape=(self.n_cond_init, self.n_part))
 
             # Iterrate over time
             for t in range(1, self.iteration):
@@ -92,15 +117,15 @@ class IsingModel:
                 #--------------------------
                 # Count the number of particles (over all simulations), that have not yet bifurcated
                 positions, speeds = (states[:, :, t, 0], states[:, :, t, 1])
-                mask = (positions != -1) & (positions != 1) & (speeds != 0)
+                mask = ((positions == -1) | (positions == 1)) & (speeds == 0)
                 number_of_parts_affected = len(positions[mask])
                 biffurcation_rate[t] = number_of_parts_affected / (self.n_part * self.n_cond_init)
 
                 # Stop the algorithm if the stopping criterion is reached
-                if biffurcation_rate[t] <= self.stopping_criterion:
-                    states, energies[:, :t], biffurcation_rate[:t]
+                if (biffurcation_rate[t] >= 1 - self.stopping_criterion) and (t>=3):
+                    return states[:, :, :t, :], energies[:, :t], 0, biffurcation_rate[:t]
 
-            return states, energies, biffurcation_rate
+            return states, energies, 0, biffurcation_rate
 
         #----------------------------------
         # CASE 2: Compute without saving the states (much faster for high number of simulations, uses less memory)
@@ -111,7 +136,9 @@ class IsingModel:
             #----------------------------------
             # 2D here because we only save the last states 
             current_state = np.zeros(shape=(self.n_cond_init, self.n_part, 2))
-            current_state[:, :, 0] = np.random.randint(0, 2, size=(self.n_cond_init, self.n_part)) * 2 - 1
+            # current_state[:, :, 0] = np.random.randint(0, 2, size=(self.n_cond_init, self.n_part)) * 2 - 1
+            # current_state[:, :, 0] = np.random.uniform(-1, 1, size=(self.n_cond_init, self.n_part)) * 2 - 1
+            current_state[:, :, 0] = np.zeros(shape=(self.n_cond_init, self.n_part))
             min_energies = np.zeros(shape=(self.iteration))
 
             # Iterrate over time
@@ -143,6 +170,24 @@ class IsingModel:
 
                 # Stop the algorithm if the stopping criterion is reached
                 if biffurcation_rate[t] <= self.stopping_criterion:
-                    return current_state, min_energies[:t], biffurcation_rate[:t]
+                    best_sim_index = np.argmin(current_energies)
+                    
+                    return current_state[best_sim_index], min_energies[:t], current_energies, biffurcation_rate[:t], 
             
             return current_state, min_energies, biffurcation_rate
+        
+
+def multiply_row(J, row):
+        return np.dot(J, row)
+
+# def parallel_multiply(J, positions, num_processes=None):
+#     with Pool(processes=num_processes) as pool:
+#         results = pool.starmap(multiply_row, [(J, row) for row in positions])
+#     return np.array(results)
+
+def parallel_multiply(J, positions, num_jobs=-1):
+    results = Parallel(n_jobs=num_jobs)(delayed(multiply_row)(J, row) for row in positions)
+    return np.array(results)
+
+def regular_multiply(J, positions):
+    return np.dot(J, positions.T).T
