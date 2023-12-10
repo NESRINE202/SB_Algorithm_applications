@@ -104,6 +104,45 @@ def extract_full_solution(states, energies):
 
     return solution_energy, spin_configuration, simulaiton_solution_index
 
+def stop_time(states):
+
+    speeds = states[:, :, :220, 1]
+    positions = states[:, :, :220, 0]
+    n_cond_init, n_particle,  n_iterration = speeds.shape 
+    abcisses = np.arange(n_iterration)
+    Temps = []
+    # In here we know that we only have one bifurcation since the pomping function is linear 
+    for i in range(n_particle): 
+        temps_arret = 0
+        while (temps_arret< n_iterration) and (positions[1, i, temps_arret]== positions[1, i, temps_arret +1]): 
+            temps_arret =+1
+        Temps.append(temps_arret)
+
+    return max(Temps), Temps
+
+
+def visualize_bifurcation(states): 
+
+    speeds = states[:, :, :220, 1]
+    positions = states[:, :, :220, 0]
+    n_cond_init, n_particle,  n_iterration = speeds.shape 
+    abcisses = np.arange(n_iterration)
+
+    for i in range(n_particle):
+        plt.plot(abcisses, speeds[1, i, :])
+        plt.xlabel("Iteration number")
+        plt.ylabel("Particle speed")
+        plt.title("Particle speed evolution")
+
+    plt.show()
+    for i in range(n_particle):
+        plt.plot(abcisses, positions[1, i, :])
+        plt.xlabel("Iteration number")
+        plt.ylabel("Particle position")
+        plt.title("Particle position evolution")
+    
+    plt.show
+
 
 if __name__=='__main__':
     plot_energies_hist(1000)
