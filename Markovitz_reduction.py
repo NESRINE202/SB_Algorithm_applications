@@ -33,8 +33,8 @@ class Markovitz:
     
     def Reduction_to_Ising(self):
         # This the projection matrix (It's not but it can be seen like that )
-        def P(self,fraction,n): 
-            p = np.zeros((n,n*fraction))
+        def P(fraction,n): 
+            p = np.zeros((n,n*(fraction-1)))
             pp = np.array([i+1 for i in range(fraction -1 )])
             for i in range(n):
                 start = i*(fraction-1)
@@ -49,19 +49,20 @@ class Markovitz:
              + self.Lamda2*np.dot(np.transpose(p),I) )/2
         
         J = np.dot(np.transpose(p), np.dot(self.V ,p))/4
-        self.H = H
-        self.J = J 
+
+        return H, J 
         
     
     def SB_optimization(self,step, iteration, n_cond_init,temperature_fluctuation,a): 
-        states,energies = computing.compute_single_instance(len(self.H), step,iteration, n_cond_init,self.J,self.H,temperature_fluctuation,a)
+        H,J = self.Reduction_to_Ising()
+        states,energies,path = computing.compute_single_instance(len(H), step,iteration, n_cond_init,J,H,temperature_fluctuation,a, savetofile=False)
 
         return states, energies
 
-    def Ising_to_Potfolio(self,step, iteration, n_cond_init,temperature_fluctuation,a): 
+    def Ising_to_Portfolio(self,step, iteration, n_cond_init,temperature_fluctuation,a): 
         # This the projection matrix (It's not but it can be seen like that )
-        def P(self,fraction,n): 
-            p = np.zeros((n,n*fraction))
+        def P(fraction,n): 
+            p = np.zeros((n,n*(fraction-1)))
             pp = np.array([i+1 for i in range(fraction -1 )])
             for i in range(n):
                 start = i*(fraction-1)
@@ -71,7 +72,9 @@ class Markovitz:
         fraction = self.fraction
         n_asset = self.n_asset
         states, energies = self.SB_optimization(step, iteration, n_cond_init,temperature_fluctuation,a)
-        Choices = (states+1)/2
+        S = states[0,:,-1,0]
+
+        Choices = (S+1)/2
         Weights = np.dot(P(fraction,n_asset),Choices)
         return Weights
 
