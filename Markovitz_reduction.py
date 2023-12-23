@@ -8,13 +8,14 @@ import results_annalysis
 
 class Markovitz:
     #In here the step , iteration , n_cond_init, fraction  are to optimize later  
-    def __init__(self,fraction,V, Mu, Lamda1, Lamda2, step, iteration, n_cond_init,temperature_fluctuation,a) -> None:
+    def __init__(self,fraction,V, Mu, Lamda1, Lamda2,Lamda, step, iteration, n_cond_init,temperature_fluctuation,a) -> None:
         #V is the covariance matrix 
         # Mu is the expected return vector 
         #Lambda 1 is the lagrange parametre for the expected return constraint 
         #Lamda 2 is the lagrange parameter for the constarint of the weight vector 
         #Lamda is a vector of lamdas that corresponds to the condition that only one 
         #n_asset is the number of assets in the portfolio 
+
 
         # Parameters of the POtrolio problem
         self.n_asset = len(Mu)
@@ -23,6 +24,7 @@ class Markovitz:
         self.Mu = Mu 
         self.Lamda1 = Lamda1
         self.Lamda2 = Lamda2
+        self.Lamda = Lamda
         # Prameters of the optimization 
         self.step = step 
         self.iteration = iteration 
@@ -41,13 +43,33 @@ class Markovitz:
                 start = i*(fraction-1)
                 p[i,start:start+len(pp)] = pp
             return p/fraction
+        # This fuction guves us a projection matric able to respect 
+        # the constraint of the sum equals to one fpr each asset 
+        def Projection(j,n,fraction): 
+            P = np.zeros(((fraction-1),n*(fraction - 1 )))
+            for i in range((fraction - 1)): 
+                P[i,j*(fraction - 1)+i] = 1
+            return P 
+
+
+
+        # Sum constraints of the spins of each asset 
+                
+        Hs = 0 
+        e1 = np.ones((self.fraction - 1) )
+        for i in range(self.n_asset): 
+            Hs+= self.Lamda[i] * np.dot(np.transpose(e1), Projection(i,self.n_asset,self.fraction))
+
+
+
         
+    
         p = P(self.fraction,self.n_asset)
 
         I = np.ones(self.n_asset)
         H = (np.dot(np.transpose(p),np.dot(self.V,I)) 
              -self.Lamda1* np.dot(np.transpose(p),self.Mu)
-             + self.Lamda2*np.dot(np.transpose(p),I) )/2
+             + self.Lamda2*np.dot(np.transpose(p),I) )/2 + Hs
         
         J = np.dot(np.transpose(p), np.dot(self.V ,p))/4
 
