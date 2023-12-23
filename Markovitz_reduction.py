@@ -13,6 +13,7 @@ class Markovitz:
         # Mu is the expected return vector 
         #Lambda 1 is the lagrange parametre for the expected return constraint 
         #Lamda 2 is the lagrange parameter for the constarint of the weight vector 
+        #Lamda is a vector of lamdas that corresponds to the condition that only one 
         #n_asset is the number of assets in the portfolio 
 
         # Parameters of the POtrolio problem
