@@ -46,8 +46,8 @@ class IsingModel:
 
         # updating the speeds
         forces = -np.dot(self.J, positions.T).T - self.H
-        speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
-        speeds = speeds + self.step(self, t) * forces + (-1 + self.temperature(t) - np.square(positions))*positions
+        # speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
+        speeds = speeds + 0.09490117387887338 * self.step(self, t) * forces + (-1 + self.temperature(t) - np.square(positions))*positions
 
         # updating the positions
         positions = positions + self.step(self, t) * speeds
@@ -91,8 +91,9 @@ class IsingModel:
             # 3D here because we save the state at each iteration
             states = np.zeros(shape=(self.n_cond_init, self.n_part, self.iteration, 2))
             # states[:, :, 0, 0] = np.random.randint(0, 2, size=(self.n_cond_init, self.n_part)) * 2 - 1
-            states[:, :, 0, 0] = np.random.uniform(-1, 1, size=(self.n_cond_init, self.n_part))
-            # states[:, :, 0, 0] = np.random.normal(0, 0.0001, size=(self.n_cond_init, self.n_part))
+            # states[:, :, 0, 0] = np.random.uniform(-1, 1, size=(self.n_cond_init, self.n_part))
+            # states[:,:,0,0]= np.cos(np.random.uniform(0, 2*np.pi, size=(self.n_cond_init,self.n_part)))
+            states[:, :, 0, 0] = np.random.normal(0, 0.0001, size=(self.n_cond_init, self.n_part))
             # states[:, :, 0, 0] = np.clip(states[:, :, 0, 0], -1, 1)
             # states[:, :, 0, 0] = np.zeros(shape=(self.n_cond_init, self.n_part))
 
@@ -108,8 +109,8 @@ class IsingModel:
                 #----------------------------------
                 # Current state energy computation
                 #----------------------------------
-                new_signed_pos = np.where(prev_positions > 0, 1, -1)
-                current_energies = np.sum(new_signed_pos @ self.J * new_signed_pos, axis=1) + self.H @ new_signed_pos.T
+                current_signed_pos = np.where(current_positions > 0, 1, -1)
+                current_energies = np.sum(current_signed_pos @ self.J * current_signed_pos, axis=1) + self.H @ current_signed_pos.T
                 energies[:, t] = current_energies
 
                 #--------------------------
@@ -123,7 +124,7 @@ class IsingModel:
 
                 # Stop the algorithm if the stopping criterion is reached
                 if (biffurcation_rate[t] >= 1 - self.stopping_criterion) and (t>=3):
-                    return states[:, :, :t, :], energies[:, :t], 0, biffurcation_rate[:t]
+                    return states[:, :, :t+1, :], energies[:, :t+1], 0, biffurcation_rate[:t+1]
 
             return states, energies, 0, biffurcation_rate
 
@@ -153,8 +154,8 @@ class IsingModel:
                 #----------------------------------
                 # Current state energy computation
                 #----------------------------------
-                new_signed_pos = np.where(prev_positions > 0, 1, -1)
-                current_energies = np.sum(new_signed_pos @ self.J * new_signed_pos, axis=1) + self.H @ new_signed_pos.T
+                current_signed_pos = np.where(current_positions > 0, 1, -1)
+                current_energies = np.sum(current_signed_pos @ self.J * current_signed_pos, axis=1) + self.H @ current_signed_pos.T
                 current_min_energy = current_energies.min()
                 min_energies[t] = current_min_energy
                 # energies[:, t] = current_energies
@@ -172,7 +173,7 @@ class IsingModel:
                 if biffurcation_rate[t] <= self.stopping_criterion:
                     best_sim_index = np.argmin(current_energies)
                     
-                    return current_state[best_sim_index], min_energies[:t], current_energies, biffurcation_rate[:t], 
+                    return current_state[best_sim_index], min_energies[:t+1], current_energies, biffurcation_rate[:t+1], 
             
             return current_state, min_energies, biffurcation_rate
         
