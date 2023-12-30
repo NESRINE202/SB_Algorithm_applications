@@ -71,6 +71,6 @@ class SimulationManager:
                 agg_energies = np.concatenate(loc_energies_arrays, axis=0)
 
             agg_las_states = np.concatenate(loc_last_states_array, axis=0)
-            agg_last_energies = np.concatenate(loc_last_energies_array, axis=0)
+            # agg_last_energies = np.concatenate(loc_last_energies_array, axis=0)
 
-            return agg_states, agg_energies, agg_las_states, agg_last_energies
+            return agg_states, agg_energies, agg_las_states, 0

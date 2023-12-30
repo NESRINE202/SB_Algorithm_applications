@@ -24,7 +24,7 @@ class SBM:
             custom_pumping_rate (function): Two photo pumping rate.
             
         """
-        self.num_particles = J.shape[0]
+        self.num_particles = J.shape[0]**2
         self.num_iterations = num_iterations
         self.stopping_criterion = stopping_criterion
         self.J =J
@@ -94,11 +94,31 @@ class SBM:
             speeds (numpy.ndarray): Array of shape (n_simulations, num_particles) representing the updated speeds of the particles for each simulation.
         """
 
+        #------- For manual max-arb --------
+        original_shape = positions.shape
+        sqrt_num_particles = int(np.sqrt(self.num_particles))
+        M = positions.reshape(self.num_simulations, sqrt_num_particles, sqrt_num_particles)
+        MT = np.transpose(M, axes=(0, 2, 1))
+        # Objective function
+        # forces = self.J
+        # Contraints
+        # P3
+        forces = -2*np.sum(M - MT)
+        # P2
+        forces -= self.num_particles * M
+        # P1
+        forces -= self.num_particles * M
+        # P4
+        forces -= MT
+
+        positions = M.reshape(original_shape[0], -1)
+        forces = forces.reshape(original_shape[0], -1)
+
         #-------- Gradient of the potential energy --------
-        forces = -np.dot(self.J, positions.T).T * self.ksi
+        # forces = -np.dot(self.J, positions.T).T * self.ksi
         
         #-------- For CIM amplitude dynamics --------
-        forces += (-1 + self.pumping_rate(t) - np.square(positions)) * positions
+        # forces += (-1 + self.pumping_rate(t) - np.square(positions)) * positions
 
         #-------- For b(alistic)SB simulation  dynamics --------
         # forces += (-1 + self.pumping_rate(t)) * positions
@@ -129,10 +149,10 @@ class SBM:
         Additional notes: This computes the energies of the binarized states.
         """
 
-        signed_positions = np.where(positions > 0, 1, -1)
-        current_energies = np.sum(signed_positions @ self.J * signed_positions, axis=1) + self.H @ signed_positions.T
+        # signed_positions = np.where(positions > 0, 1, -1)
+        # current_energies = np.sum(signed_positions @ self.J * signed_positions, axis=1) + self.H @ signed_positions.T
 
-        return current_energies
+        return 0
 
     def TAC(self, positions, speeds):
         return positions, speeds
