@@ -2,5 +2,7 @@
 *.pyc
 *.npz
 *.icloud
+*.DS_Store
+*.prof
 computing_results/
 graph_visualisation/
