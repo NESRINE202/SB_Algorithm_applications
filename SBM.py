@@ -75,7 +75,7 @@ class SBM:
         self.energies = np.zeros(shape=(self.num_simulations, self.num_iterations))
 
         #-------- Model Parameters --------
-        self.ksi = 0.5/np.sqrt( np.sum(np.square(self.J)) / (self.num_particles-1) )
+        self.ksi = 0.5/np.sqrt( np.sum(np.square(self.J)) / (self.num_particles-1) ) if np.sum(np.square(self.J))!=0 else 1
 
         #------ Initial conditions -------
         self.current_state[:, :, 0] = np.random.normal(0, 0.001, size=(self.num_simulations, self.num_particles))
