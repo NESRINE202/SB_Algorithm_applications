@@ -80,6 +80,13 @@ class SBM:
         #------ Initial conditions -------
         self.current_state[:, :, 0] = np.random.normal(0, 0.001, size=(self.num_simulations, self.num_particles))
 
+    def compute_matrix_C(B):
+        n = B.shape[0]
+        sum_rows = np.sum(B, axis=1) # Sum of each row
+        sum_cols = np.sum(B, axis=0) # Sum of each column
+        C = 2 * (sum_cols + sum_rows[:, None])
+
+        return C
 
     def simplectic_update(self, positions, speeds, t):
         """
@@ -93,23 +100,29 @@ class SBM:
             positions (numpy.ndarray): Array of shape (n_simulations, num_particles) representing the updated positions of the particles for each simulation.
             speeds (numpy.ndarray): Array of shape (n_simulations, num_particles) representing the updated speeds of the particles for each simulation.
         """
-
+        
         #------- For manual max-arb --------
         original_shape = positions.shape
         sqrt_num_particles = int(np.sqrt(self.num_particles))
         M = positions.reshape(self.num_simulations, sqrt_num_particles, sqrt_num_particles)
         MT = np.transpose(M, axes=(0, 2, 1))
+
         # Objective function
         # forces = self.J
-        # Contraints
-        # P3
-        forces = -2*np.sum(M - MT)
-        # P2
-        forces -= self.num_particles * M
-        # P1
-        forces -= self.num_particles * M
-        # P4
-        forces -= MT
+        
+        # # Contraints
+        # # P3
+        # forces = -2*np.sum(M - MT)
+        # # P2
+        # forces -= self.num_particles * M
+        # # P1
+        # forces -= self.num_particles * M
+        # # P4
+        # forces -= MT
+
+        # Hugo's derivative of the constraints
+        forces = [-self.compute_matrix_C(self.positions[i]) for i in range(self.positions.shape[0])]
+        forces = np.array(forces)
 
         positions = M.reshape(original_shape[0], -1)
         forces = forces.reshape(original_shape[0], -1)
