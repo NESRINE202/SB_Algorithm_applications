@@ -75,16 +75,28 @@ class SBM:
         self.energies = np.zeros(shape=(self.num_simulations, self.num_iterations))
 
         #-------- Model Parameters --------
-        self.ksi = 0.5/np.sqrt( np.sum(np.square(self.J)) / (self.num_particles-1) )
+        self.ksi = 0.5/np.sqrt( np.sum(np.square(self.J)) / (self.num_particles-1) ) if np.sum(np.square(self.J))!=0 else 1
 
         #------ Initial conditions -------
         self.current_state[:, :, 0] = np.random.normal(0, 0.001, size=(self.num_simulations, self.num_particles))
 
-    def compute_matrix_C(B):
+    def compute_matrix_C(self, B):
         n = B.shape[0]
-        sum_rows = np.sum(B, axis=1) # Sum of each row
-        sum_cols = np.sum(B, axis=0) # Sum of each column
-        C = 2 * (sum_cols + sum_rows[:, None])
+
+        # 2*sum of each row excluding the diagonal
+        row_sums = 2 * (B.sum(axis=1) - np.diag(B))
+
+        # 2*sum of each column excluding the diagonal
+        col_sums = 2 * (B.sum(axis=0) - np.diag(B))
+
+        # Calculate the third complex term
+        term3 = 2 * ((B.sum(axis=0) - B).T + (B.sum(axis=1) - B) - B + B.T)
+
+        # Add b_{s,k} and b_{k,s}
+        term4 = np.diag(B)[:, None] + np.diag(B)
+
+        # Combine all terms and reshape term4 for broadcasting
+        C = row_sums[:, None] + col_sums + term3 + term4
 
         return C
 
@@ -106,23 +118,19 @@ class SBM:
         sqrt_num_particles = int(np.sqrt(self.num_particles))
         M = positions.reshape(self.num_simulations, sqrt_num_particles, sqrt_num_particles)
         MT = np.transpose(M, axes=(0, 2, 1))
-
-        # Objective function
-        # forces = self.J
         
         # # Contraints
         # # P3
         # forces = -2*np.sum(M - MT)
         # # P2
-        # forces -= self.num_particles * M
+        # forces -= M.sum(axis=1)
         # # P1
-        # forces -= self.num_particles * M
+        # forces -= M
         # # P4
         # forces -= MT
 
-        # Hugo's derivative of the constraints
-        forces = [-self.compute_matrix_C(self.positions[i]) for i in range(self.positions.shape[0])]
-        forces = np.array(forces)
+        # Hugo's derivative of the constraints (+ objective function)
+        forces = np.array([self.J - self.compute_matrix_C(M[i]) for i in range(self.num_simulations)])
 
         positions = M.reshape(original_shape[0], -1)
         forces = forces.reshape(original_shape[0], -1)
