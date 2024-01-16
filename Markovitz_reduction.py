@@ -43,6 +43,15 @@ class Markovitz:
                 start = i*(fraction-1)
                 p[i,start:start+len(pp)] = pp
             return p/fraction
+        
+        def Pbinaire(bits,n): 
+            p = np.zeros((n,n*(bits)))
+            pp = np.array([2**i for i in range(bits)])
+            for i in range(n):
+                start = i*(bits)
+                p[i,start:start+len(pp)] = pp
+            return p/(2**bits)
+        
         # This fuction guves us a projection matric able to respect 
         # the constraint of the sum equals to one fpr each asset 
         def Projection(j,n,fraction): 
@@ -63,15 +72,16 @@ class Markovitz:
 
 
         
+        # p = P(self.fraction,self.n_asset)
     
-        p = P(self.fraction,self.n_asset)
+        p = Pbinaire(self.fraction,self.n_asset)
 
         I = np.ones(self.n_asset)
         H = (np.dot(np.transpose(p),np.dot(self.V,I)) 
-             -self.Lamda1* np.dot(np.transpose(p),self.Mu)
-             + self.Lamda2*np.dot(np.transpose(p),I) )/2 + Hs
+             -self.Lamda1 * np.dot(np.transpose(p),self.Mu)
+              +self.Lamda2*np.dot(np.transpose(p),I) )/2 #+ Hs
         
-        J = np.dot(np.transpose(p), np.dot(self.V ,p))/4
+        J = -np.dot(np.transpose(p), np.dot(self.V ,p))/2
 
         return H, J 
         
@@ -91,14 +101,26 @@ class Markovitz:
                 start = i*(fraction-1)
                 p[i,start:start+len(pp)] = pp
             return p/fraction
+        def Pbinaire(bits,n): 
+            p = np.zeros((n,n*(bits)))
+            pp = np.array([2**i for i in range(bits)])
+            for i in range(n):
+                start = i*(bits)
+                p[i,start:start+len(pp)] = pp
+            return p/(2**bits)
         
         fraction = self.fraction
         n_asset = self.n_asset
         states, energies = self.SB_optimization(step, iteration, n_cond_init,temperature_fluctuation,a)
-        S = states[0,:,-1,0]
-
+        S = states[40,:,-1,0]
+        SF= np.zeros(len(S))
+        for i in range(len(S)): 
+            if S[i]>=0: 
+                SF[i] = 1
+            else: 
+                SF[i] = -1
         Choices = (S+1)/2
-        Weights = np.dot(P(fraction,n_asset),Choices)
+        Weights = np.dot(Pbinaire(fraction,n_asset),Choices)
         return Weights
 
 
