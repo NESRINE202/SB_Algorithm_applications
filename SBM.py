@@ -8,7 +8,7 @@ import random
 # This file creats the IsingModel class
 
 class SBM:
-    def __init__(self, J, H, step_size, num_iterations, num_simulations, stopping_criterion=0, save_states_history=True, save_energies_history=True, custom_pumping_rate=None):
+    def __init__(self, J, H, step_size, num_iterations, num_simulations, stopping_criterion=0, save_states_history=True, save_energies_history=True, custom_pumping_rate=None, lambdas=[1, 0, 0, 0, 0]):
         """
         Args:
             ------Numerical resultion parameters-------
@@ -35,6 +35,7 @@ class SBM:
         self.step_size = step_size if callable(step_size) else (lambda self, t: step_size)
         self.num_simulations=num_simulations
         self.initialize_model()
+        self.lbds = np.array(lambdas)/np.linalg.norm(np.array(lambdas))
 
 
     def default_pumping_rate(self, t, _):
@@ -80,8 +81,10 @@ class SBM:
         #------ Initial conditions -------
         self.current_state[:, :, 0] = np.random.normal(0, 0.001, size=(self.num_simulations, self.num_particles))
 
-    def compute_matrix_C(self, B):
+    def old_compute_matrix_C(self, B):
         n = B.shape[0]
+
+        B = B + 1
 
         # 2*sum of each row excluding the diagonal
         row_sums = 2 * (B.sum(axis=1) - np.diag(B))
@@ -97,6 +100,49 @@ class SBM:
 
         # Combine all terms and reshape term4 for broadcasting
         C = row_sums[:, None] + col_sums + term3 + term4
+
+        return C
+    
+    def compute_matrix_C(self, B, lbds):
+        n = B.shape[0]
+
+        B = (B + 1)/2
+
+        C = np.zeros((n, n))
+
+        # # term 1
+        # C += 2*np.sum(B, axis=0)
+        # # term 2
+        # C += 2*np.sum(B, axis=1)[:, None]
+
+        # # term 3
+        # C += 2*np.sum(B, axis=0)+np.sum(B, axis=1)[:, None]
+        
+        # # term 4
+        # C -= np.sum(B.T, axis=0)-np.sum(B.T, axis=1)[:, None]
+
+        # # term 4
+        # C += B.T
+
+        C += lbds[0]*4*(np.sum(B, axis=1)[:, None] +np.sum(B, axis=0) - np.sum(B.T, axis=0) - np.sum(B.T, axis=1)[:, None])
+
+        return C
+
+    def jupin_compute_matrix_C(self, B, lbds):
+        n = B.shape[0]
+
+        B = (B + 1)/2
+
+        C = np.zeros((n, n))
+
+        # term 1
+        C += lbds[0]*2*np.sum(B, axis=0)
+        # term 2
+        C += lbds[1]*2*np.sum(B, axis=1)[:, None]
+        # term 3
+        C += lbds[3]*2*np.sum(B.T, axis=0)-np.sum(B, axis=0)+np.sum(B.T, axis=1)[:, None]-np.sum(B, axis=1)[:, None]
+        # term 4
+        C += lbds[3]* (B + B.T)
 
         return C
 
@@ -130,10 +176,11 @@ class SBM:
         # forces -= MT
 
         # Hugo's derivative of the constraints (+ objective function)
-        forces = np.array([self.J - self.compute_matrix_C(M[i]) for i in range(self.num_simulations)])
+        forces = np.array([-self.lbds[0]*self.J - self.compute_matrix_C(M[i], self.lbds[1:]) for i in range(self.num_simulations)])
 
         positions = M.reshape(original_shape[0], -1)
         forces = forces.reshape(original_shape[0], -1)
+        # forces = np.abs(forces).max() # normalise forces?
 
         #-------- Gradient of the potential energy --------
         # forces = -np.dot(self.J, positions.T).T * self.ksi

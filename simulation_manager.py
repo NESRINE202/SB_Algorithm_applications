@@ -4,7 +4,7 @@ import datetime
 import concurrent.futures
 
 class SimulationManager:
-    def __init__(self, step_size, num_iterations, num_simulations, J, H, pumping_rate=None, stopping_criterion=0, save_states_history=True, save_energies_history=True, n_threads=1, savetofile=True):
+    def __init__(self, step_size, num_iterations, num_simulations, J, H, pumping_rate=None, stopping_criterion=0, save_states_history=True, save_energies_history=True, n_threads=1, savetofile=True, lambdas=[0, 0, 0, 0, 0]):
         self.step_size = step_size
         self.num_iterations = num_iterations
         self.num_simulations = num_simulations
@@ -16,6 +16,8 @@ class SimulationManager:
         self.save_states_history = save_states_history
         self.save_energies_history = save_energies_history
         self.n_threads = n_threads
+        self.lambdas = lambdas
+        
 
     def create_sbm_instance(self):
         """
@@ -36,7 +38,8 @@ class SimulationManager:
             stopping_criterion=self.stopping_criterion,
             save_states_history=self.save_states_history,
             save_energies_history=self.save_energies_history,
-            custom_pumping_rate=self.pumping_rate
+            custom_pumping_rate=self.pumping_rate,
+            lambdas=self.lambdas
             )
         
         return machine
