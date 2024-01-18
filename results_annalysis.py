@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from instance_genrerantion import generate_instance
-from ising_model import IsingModel
+from instance_genrerantionV2 import generate_instance
+from ising_modelV2 import IsingModel
 import time
 
 # This file is for reading results saved by the computing.py file and to make various visualization of it

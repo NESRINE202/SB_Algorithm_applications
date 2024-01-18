@@ -1,9 +1,8 @@
 #Imports 
-
 import numpy as np 
 import matplotlib as plt 
-import ising_model
-import computing 
+import ising_modelV2
+import computingV2 
 import results_annalysis
 
 class Markovitz:
@@ -32,7 +31,14 @@ class Markovitz:
         self.temperature_fluctuation = temperature_fluctuation
         self. a = a 
         
-
+    def Pbinaire(self,bits,n): 
+        p = np.zeros((n,n*(bits)))
+        pp = np.array([2**i for i in range(bits)])
+        # pp= np.ones(bits)
+        for i in range(n):
+            start = i*(bits)
+            p[i,start:start+len(pp)] = pp
+        return p/(2**bits)
     
     def Reduction_to_Ising(self):
         # This the projection matrix (It's not but it can be seen like that )
@@ -43,54 +49,83 @@ class Markovitz:
                 start = i*(fraction-1)
                 p[i,start:start+len(pp)] = pp
             return p/fraction
-        
-        def Pbinaire(bits,n): 
-            p = np.zeros((n,n*(bits)))
-            pp = np.array([2**i for i in range(bits)])
-            for i in range(n):
-                start = i*(bits)
-                p[i,start:start+len(pp)] = pp
-            return p/(2**bits)
-        
+
         # This fuction guves us a projection matric able to respect 
         # the constraint of the sum equals to one fpr each asset 
         def Projection(j,n,fraction): 
-            P = np.zeros(((fraction-1),n*(fraction - 1 )))
-            for i in range((fraction - 1)): 
-                P[i,j*(fraction - 1)+i] = 1
+            P = np.zeros(((fraction),n*(fraction - 1 )))
+            for i in range((fraction)): 
+                P[i,j*(fraction )+i] = 1
             return P 
 
 
 
         # Sum constraints of the spins of each asset 
                 
-        Hs = 0 
-        e1 = np.ones((self.fraction - 1) )
-        for i in range(self.n_asset): 
-            Hs+= self.Lamda[i] * np.dot(np.transpose(e1), Projection(i,self.n_asset,self.fraction))
+        # Hs =0
+        # e1 = np.ones((self.fraction) )
+        # for i in range(self.n_asset): 
+        #     Hs+= self.Lamda[i] * np.dot(np.transpose(e1), Projection(i,self.n_asset,self.fraction))
 
 
 
         
         # p = P(self.fraction,self.n_asset)
     
-        p = Pbinaire(self.fraction,self.n_asset)
+        p = self.Pbinaire(self.fraction,self.n_asset)
 
         I = np.ones(self.n_asset)
-        H = (np.dot(np.transpose(p),np.dot(self.V,I)) 
-             -self.Lamda1 * np.dot(np.transpose(p),self.Mu)
-              +self.Lamda2*np.dot(np.transpose(p),I) )/2 #+ Hs
-        
-        J = -np.dot(np.transpose(p), np.dot(self.V ,p))/2
+        I1 = np.ones(self.n_asset*self.fraction)
+        # H =(p.T @ self.V @ p @I1 - self.Lamda1*p.T@self.Mu
+        #       +self.Lamda2*np.dot(np.transpose(p),I) )/2 #+ Hs
 
-        return H, J 
+        H = 0.5 *(p.T @ self.V @ p @I1 - self.Lamda1*p.T@self.Mu
+                  +2*self.Lamda2*(1-0.5*(p@I1).T@I)*p.T@I) 
+        
+        A = p.T@p
+
+        J = -0.5*(np.dot(np.transpose(p), np.dot(self.V ,p))-self.Lamda2*A)
+
+
+        return H, J
+    
+    def forces(self,positions): 
+
+        
+        p = self.Pbinaire(self.fraction,self.n_asset)
+        # I1 = np.ones(np.shape(self.V.T @positions))
+        I2 = np.ones(np.shape(p @ positions[0,:]))
+        force = np.zeros((self.n_cond_init,self.fraction*self.n_asset))
+        for i in range(self.n_cond_init):
+            force[i,:] = (0.5* p.T @ self.V @ p @ positions[i,:]
+                    + 0.5* p.T @ self.V @ I2 - 0.5 * self.Lamda1* p.T@self.Mu 
+                    - self.Lamda2*(1 - self.n_asset - 0.5*(p @ positions[i,:]).T @ I2)* (p.T@I2))
+
+        return force
         
     
     def SB_optimization(self,step, iteration, n_cond_init,temperature_fluctuation,a): 
         H,J = self.Reduction_to_Ising()
-        states,energies,path = computing.compute_single_instance(len(H), step,iteration, n_cond_init,J,H,temperature_fluctuation,a, savetofile=False)
+        states,energies,path = computingV2.compute_single_instance(len(H), step,iteration, n_cond_init,J,H,temperature_fluctuation,a, savetofile=False)
 
-        return states, energies
+        return states,energies
+    
+    def energies(self,states): 
+        energies = np.zeros((self.n_cond_init,self.iteration))
+
+        p = self.Pbinaire(self.fraction,self.n_asset)
+        positions = states[:,:,:,0]
+        I1= np.ones(np.shape(positions[0,:,0]))
+        I2 = np.ones(np.shape(p@positions[0,:,0]))
+        for i in range(self.n_cond_init):
+            for t in range(self.iteration): 
+                energies[i,t] = (0.25 * ((p @ positions[i,:,t]).T@self.V@p@positions[i,:,t]+
+                                           2*(p@positions[i,:,t]).T@self.V@p@I1)- 
+                                           0.25*self.Lamda1*((p@positions[i,:,t]).T@self.Mu+(p@I1).T@self.Mu)
+                                           - self.Lamda2*(1- self.n_asset - 0.5* (p@positions[i,:,t]).T @ I2)**2)
+        
+        return energies
+
 
     def Ising_to_Portfolio(self,step, iteration, n_cond_init,temperature_fluctuation,a): 
         # This the projection matrix (It's not but it can be seen like that )
@@ -101,13 +136,7 @@ class Markovitz:
                 start = i*(fraction-1)
                 p[i,start:start+len(pp)] = pp
             return p/fraction
-        def Pbinaire(bits,n): 
-            p = np.zeros((n,n*(bits)))
-            pp = np.array([2**i for i in range(bits)])
-            for i in range(n):
-                start = i*(bits)
-                p[i,start:start+len(pp)] = pp
-            return p/(2**bits)
+
         
         fraction = self.fraction
         n_asset = self.n_asset
@@ -120,23 +149,10 @@ class Markovitz:
             else: 
                 SF[i] = -1
         Choices = (S+1)/2
-        Weights = np.dot(Pbinaire(fraction,n_asset),Choices)
+        Weights = np.dot(self.Pbinaire(fraction,n_asset),Choices)
         return Weights
 
 
 
-
-
-
-
-
-
-    
-
-
-
-    
-
-    
 
 

@@ -1,15 +1,15 @@
-from ising_model import IsingModel
-import instance_genrerantion
+from ising_modelV2 import IsingModel
+import instance_genrerantionV2
 import numpy as np
 import datetime
 
 # This file is for doing the actual simulation and saving the results to be latter annalysed
 
 # compute for a sigle instance
-def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H, temperature=None, a=None, savetofile=True):
+def compute_single_instance(instance_size, step, n_itterations, n_cond_init, J, H,forces, temperature=None, a=None, savetofile=True):
     # run the algorithm
-    ising_model = IsingModel(step, n_itterations, n_cond_init, J, H, temperature, a)
-    states, energies = ising_model.simulate()
+    ising_model = IsingModel(step, n_itterations, n_cond_init, J, H,forces, temperature, a)
+    states,energies = ising_model.simulate()
 
     # Save all the data (parameters, instance, results) inside of a file
     # Contains the parameters, the instance matrix and the states and enrgies matrices

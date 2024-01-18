@@ -5,7 +5,7 @@ import time
 # This file creats the IsingModel class
 
 class IsingModel:
-    def __init__(self, step, iteration, n_cond_init, J, H, custom_temperature=None, custom_a=None):
+    def __init__(self, step, iteration, n_cond_init, J, H, custom_forces = None, custom_temperature=None, custom_a=None):
         # n nombre de particule
         # J matrice des forces d'interaction
         # n_cond_init, nombres de conditions initiales différentes
@@ -17,6 +17,7 @@ class IsingModel:
         self.a_func = custom_a if custom_a is not None else self.default_a
         self.step = step if callable(step) else (lambda self, t: step)
         self.n_cond_init=n_cond_init
+        self.custom_forces = custom_forces if custom_forces is not None else self.default_forces
 
     
     # Default a and temperature functions
@@ -25,7 +26,8 @@ class IsingModel:
 
     def default_temperature(self, t, _):
         return 0
-
+    def default_forces(self,t,_): 
+        return 0
     # a and temparature functions callers
     def a(self, t):
         return self.a_func(self, t)
@@ -37,9 +39,10 @@ class IsingModel:
         # states of shape (n_cond_init, n_particles, 2)
 
         # updating the speeds
-        forces = -np.dot(self.J, positions.T).T-self.H
+        # forces = -np.dot(self.J, positions.T).T-self.H
+        #Test directly derive the hamiltonian
         speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
-        speeds = speeds + self.step(self, t) * forces
+        speeds = speeds + self.step(self, t) * self.custom_forces(positions)
 
         # updating the positions
         positions = positions + self.step(self, t) * speeds
@@ -73,13 +76,13 @@ class IsingModel:
             # calcul des énergies  ####### calcule de l'energie n'a pas de sens avec des x variable je pense
             new_signed_pos=np.where(prev_positions>0, 1, -1)
             
-            current_energies = np.sum(new_signed_pos @ self.J * new_signed_pos, axis=1) + self.H @ new_signed_pos.T # 1d array containing the energies for all the initial conditions
-            energies[:, t] = current_energies
+            # current_energies = np.sum(new_signed_pos @ self.J * new_signed_pos, axis=1) + self.H @ new_signed_pos.T # 1d array containing the energies for all the initial conditions
+            # energies[:, t] = current_energies
         
-        return states, energies
+        return states
 
 
 if __name__ == "__main__":
-    import instance_genrerantion
+    import instance_genrerantionV2
     from results_annalysis import plot_energies_evolution
     #plot_energies_evolution() 
