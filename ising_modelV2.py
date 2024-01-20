@@ -39,7 +39,11 @@ class IsingModel:
         # states of shape (n_cond_init, n_particles, 2)
 
         # updating the speeds
-        forces = np.dot(self.J, positions.T).T-self.H
+        # forces = np.dot(self.J, positions.T).T-self.H
+        forces = np.zeros(np.shape(positions))
+        for i in range(self.n_cond_init): 
+            forces[i,:] = self.J @ positions[i,:] - self.H
+
         #Test directly derive the hamiltonian
         speeds = speeds * (1-self.a(t) + self.step(self, t) * self.temperature(t))
         speeds = speeds + self.step(self, t) * forces #self.forces(positions)
