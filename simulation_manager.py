@@ -55,14 +55,27 @@ class SimulationManager:
                 results = [future.result() for future in concurrent.futures.as_completed(futures)]
 
             # Unpack the results
-            loc_states_arrays, loc_energies_arrays, loc_last_states_array, loc_last_energies_array = [], [], [], []
+            loc_states_arrays, loc_energies_arrays, loc_last_states_array, loc_last_TAC_states_array, loc_last_sign_states_array, loc_last_energies_array, loc_last_TAC_energies_array, loc_last_sign_energies_array, loc_final_times_array, loc_sign_times_array, loc_TAC_times_array = [], [], [], [], [], [], [], [], [], [], []
 
             for i in range(self.n_threads):
-                loc_states, loc_energies, loc_last_state, loc_last_energies = results[i]
+                loc_states, loc_energies, loc_last_state, loc_last_energies, loc_times = results[i]
+
+                # special unpacking for early stopping
+                loc_last_state, loc_last_TAC_state, loc_last_sign_state = loc_last_state
+                loc_last_energies, loc_last_TAC_energies, loc_last_sign_energies = loc_last_energies
+                loc_final_time, loc_sign_time, loc_TAC_time = loc_times
+
                 loc_states_arrays.append(loc_states)
                 loc_energies_arrays.append(loc_energies)
                 loc_last_states_array.append(loc_last_state)
+                loc_last_TAC_states_array.append(loc_last_TAC_state)
+                loc_last_sign_states_array.append(loc_last_sign_state)
                 loc_last_energies_array.append(loc_last_energies)
+                loc_last_TAC_energies_array.append(loc_last_TAC_energies)
+                loc_last_sign_energies_array.append(loc_last_sign_energies)
+                loc_final_times_array.append(loc_final_time)
+                loc_sign_times_array.append(loc_sign_time)
+                loc_TAC_times_array.append(loc_TAC_time)
         
             agg_states, agg_energies = None, None
             if self.save_states_history:
@@ -70,7 +83,16 @@ class SimulationManager:
             if self.save_energies_history:
                 agg_energies = np.concatenate(loc_energies_arrays, axis=0)
 
-            agg_las_states = np.concatenate(loc_last_states_array, axis=0)
-            agg_last_energies = np.concatenate(loc_last_energies_array, axis=0)
+            agg_last_states = np.concatenate(loc_last_states_array, axis=0)
+            agg_last_TAC_states = np.concatenate(loc_last_TAC_states_array, axis=0)
+            agg_last_sign_states = np.concatenate(loc_last_sign_states_array, axis=0)
 
-            return agg_states, agg_energies, agg_las_states, agg_last_energies
+            agg_last_energies = np.concatenate(loc_last_energies_array, axis=0)
+            agg_last_TAC_energies = np.concatenate(loc_last_TAC_energies_array, axis=0)
+            agg_last_sign_energies = np.concatenate(loc_last_sign_energies_array, axis=0)
+
+            # agg_final_times = np.concatenate(loc_final_times_array, axis=0)
+            # agg_sign_times = np.concatenate(loc_sign_times_array, axis=0)
+            # agg_TAC_times = np.concatenate(loc_TAC_times_array, axis=0)
+
+            return agg_states, agg_energies, agg_last_states, agg_last_TAC_states, agg_last_sign_states, agg_last_energies, agg_last_TAC_energies, agg_last_sign_energies, loc_final_times_array, loc_sign_times_array, loc_TAC_times_array

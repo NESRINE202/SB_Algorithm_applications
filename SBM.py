@@ -75,10 +75,11 @@ class SBM:
         self.energies = np.zeros(shape=(self.num_simulations, self.num_iterations))
 
         #-------- Model Parameters --------
-        self.ksi = 0.5/np.sqrt( np.sum(np.square(self.J)) / (self.num_particles-1) )
+        # self.ksi = 0.5/np.sqrt( np.sum(np.square(self.J)) / (self.num_particles-1) )
+        self.ksi = 1/np.linalg.eigvals(self.J).max()
 
         #------ Initial conditions -------
-        self.current_state[:, :, 0] = np.random.normal(0, 0.001, size=(self.num_simulations, self.num_particles))
+        self.current_state[:, :, 0] = np.random.normal(0, 0.0001, size=(self.num_simulations, self.num_particles))
 
 
     def simplectic_update(self, positions, speeds, t):
@@ -130,13 +131,86 @@ class SBM:
         """
 
         signed_positions = np.where(positions > 0, 1, -1)
-        current_energies = np.sum(signed_positions @ self.J * signed_positions, axis=1) + self.H @ signed_positions.T
-
+        # current_energies = np.sum(signed_positions @ self.J * signed_positions, axis=1) + self.H @ signed_positions.T
+        current_energies = np.sum(positions @ self.J * positions, axis=1) + self.H @ positions.T
+        
         return current_energies
 
-    def TAC(self, positions, speeds):
-        return positions, speeds
+    def sign(self, current_state):
+        current_state = np.copy(current_state)
 
+        positions = current_state[:, :, 0]
+
+        return np.sign(positions)
+
+
+    def TAC(self, current_state):
+            current_state = np.copy(current_state)
+
+            positions = current_state[:, :, 0]
+
+            k = 0.5
+            
+            spins = np.zeros_like(positions)
+
+            epsilons = k*np.linalg.norm(positions)/np.sqrt(800)        
+
+            # STEP 1: Trap the traped nodes and put the swing nodes to zer
+            spins = np.where(np.abs(positions) < epsilons, 0, np.sign(positions))
+
+            # STEP 2: Randomly select the the oder in which we are going to set the spins associated to the swing nodes
+            zero_indexes = np.where(spins==0)
+
+            # STEP 3:
+            for sim_index in range(self.num_simulations):
+                    sim_spins = spins[sim_index]
+                    zero_indexes = np.where(sim_spins==0)[0]
+                    np.random.shuffle(zero_indexes)
+
+                    for index in zero_indexes:
+                            forces = -np.dot(self.J, sim_spins.T).T
+                            sim_spins[index] = np.sign(forces[index])
+                    
+                    prev_count = zero_indexes.shape[0]
+                    zero_indexes = np.where(sim_spins==0)[0]
+                    if zero_indexes.shape[0] == prev_count:
+                            # print("TAC failed to converge")
+                            break
+                    
+                    spins[sim_index] = sim_spins
+            
+            return spins
+
+
+    def early_sign_stopping(self, current_state):
+        current_state = np.copy(current_state)
+
+        mask1 = np.all(current_state == [-1, 0], axis=2)
+        mask2 = np.all(current_state == [1, 0], axis=2)
+
+        mask = mask1 | mask2
+
+        bifurcated_percentage = np.sum(mask) / (self.num_particles*self.num_simulations)
+
+        if bifurcated_percentage >= 1-self.stopping_criterion:
+            return True
+        
+        return False
+    
+    def early_TAC_stopping(self, current_state):
+        current_state = np.copy(current_state)
+
+        mask1 = np.all(current_state == [-1, 0], axis=2)
+        mask2 = np.all(current_state == [1, 0], axis=2)
+
+        mask = mask1 | mask2
+
+        bifurcated_percentage = np.sum(mask) / (self.num_particles*self.num_simulations)
+
+        if bifurcated_percentage >= 1-self.stopping_criterion:
+            return True
+        
+        return False
 
     def simulate(self):
         """
@@ -149,6 +223,13 @@ class SBM:
             current_energies (numpy.ndarray): Array of shape (n_simulations) representing the energies of the different simulations at the last iteration time.
         """
 
+        stopped_sign_early, stopped_TAC_early = False, False
+
+        early_stopped_states_sign, early_stopped_states_TAC = None, None
+        sign_energies, TAC_energies = None, None
+
+        start_time = time.time()
+        sign_stop_time, TAC_stop_time = 0, 0
         for t in range(self.num_iterations):
             # fetch the previous positions and speeds
             positions, speeds = self.current_state[:, :, 0], self.current_state[:, :, 1]
@@ -165,10 +246,28 @@ class SBM:
             if self.save_energies_history:
                 self.energies[:, t] = current_energies
 
+            # early stopping
+            if self.early_sign_stopping(self.current_state) and not stopped_sign_early: #and not stroped_early:
+                stopped_sign_early = True
+                early_stopped_states_sign = self.sign(self.current_state)
+                sign_energies = self.compute_energies(early_stopped_states_sign)
+
+                sign_stop_time = time.time()
+
+            if self.early_TAC_stopping(self.current_state) and not stopped_TAC_early:
+                stopped_TAC_early = True
+                early_stopped_states_TAC = self.TAC(self.current_state)
+                TAC_energies = self.compute_energies(early_stopped_states_TAC)
+
+                TAC_stop_time = time.time()
+                
+
         # Return what needs to be returned
         if not self.save_energies_history:
             self.energies = None
         if not self.save_states_history:
             self.states = None
+
+        final_stop_time = time.time()
         
-        return self.states, self.energies, self.current_state, current_energies
+        return self.states, self.energies, (self.current_state, early_stopped_states_sign, early_stopped_states_TAC), (current_energies, sign_energies, TAC_energies), (sign_stop_time-start_time, TAC_stop_time-sign_stop_time, final_stop_time-TAC_stop_time)
