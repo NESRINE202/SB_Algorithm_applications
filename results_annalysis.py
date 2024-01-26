@@ -32,6 +32,33 @@ def plot_energies_evolution(energies):
 
     plt.show()
 
+def complete_plot(states, energies, sim_index):
+
+    positions = states[sim_index, :, :, 0]
+    energies = energies[sim_index]
+    num_particles, n_iterration = positions.shape
+    abcisses = np.arange(n_iterration)
+
+    plt.figure(figsize=(14, 6))
+    plt.subplot(1, 2, 1)  # 1 row, 2 columns, first plot
+
+
+    for i in range(num_particles):
+        plt.plot(abcisses, (positions[i, :]))
+
+    plt.xlabel("$t$")
+    plt.ylabel("Oscillators positions $x_i$")
+    plt.title("Evolution of the positions of the oscillators")
+
+    plt.subplot(1, 2, 2)  # 1 row, 2 columns, second plot
+    plt.plot(abcisses, energies)
+    plt.xlabel("$t$")
+    plt.ylabel("Energy level")
+    plt.title("Evolution of the system's energy")
+
+    plt.tight_layout()  # Adjust the layout
+    plt.show()
+
 def plot_speeds_evolution(states):
     speeds = states[:, :, :, 2]
     n_cond_init, _,  n_iterration = speeds.shape 

@@ -84,12 +84,12 @@ class SimulationManager:
                 agg_energies = np.concatenate(loc_energies_arrays, axis=0)
 
             agg_last_states = np.concatenate(loc_last_states_array, axis=0)
-            agg_last_TAC_states = np.concatenate(loc_last_TAC_states_array, axis=0)
-            agg_last_sign_states = np.concatenate(loc_last_sign_states_array, axis=0)
+            agg_last_TAC_states = None#np.concatenate(loc_last_TAC_states_array, axis=0)
+            agg_last_sign_states = None#np.concatenate(loc_last_sign_states_array, axis=0)
 
             agg_last_energies = np.concatenate(loc_last_energies_array, axis=0)
-            agg_last_TAC_energies = np.concatenate(loc_last_TAC_energies_array, axis=0)
-            agg_last_sign_energies = np.concatenate(loc_last_sign_energies_array, axis=0)
+            agg_last_TAC_energies = None#np.concatenate(loc_last_TAC_energies_array, axis=0)
+            agg_last_sign_energies = None#np.concatenate(loc_last_sign_energies_array, axis=0)
 
             # agg_final_times = np.concatenate(loc_final_times_array, axis=0)
             # agg_sign_times = np.concatenate(loc_sign_times_array, axis=0)
