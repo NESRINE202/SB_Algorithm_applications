@@ -3,7 +3,7 @@
 ## Installation
 Clone the repository:
 
-`git clone https://gitlab-student.centralesupelec.fr/chahine.nejma/bifurcation-simule.git`
+`git clone https://github.com/NESRINE202/SB_Algorithm_applications
 
 Install the required dependencies (preferably in a virtual environment):
 
