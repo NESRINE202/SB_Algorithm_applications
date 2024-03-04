@@ -96,13 +96,13 @@ class SBM:
         """
 
         #-------- Gradient of the potential energy --------
-        forces = -np.dot(self.J, positions.T).T * self.ksi
+        forces = -np.dot(self.J, positions.T).T * self.ksi + self.H * positions
         
         #-------- For CIM amplitude dynamics --------
-        forces += (-1 + self.pumping_rate(t) - np.square(positions)) * positions
+        # forces += (-1 + self.pumping_rate(t) - np.square(positions)) * positions
 
         #-------- For b(alistic)SB simulation  dynamics --------
-        # forces += (-1 + self.pumping_rate(t)) * positions
+        forces += (-1 + self.pumping_rate(t)) * positions
 
         #-------- For d(iscrete)SB simulatio  dynamics --------
         # forces = -np.dot(self.J, np.sign(positions).T).T * self.ksi + (-1 + self.pumping_rate(t)) * positions # for d(iscrete)SB simulation
