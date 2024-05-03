@@ -95,14 +95,14 @@ class SBM:
             speeds (numpy.ndarray): Array of shape (n_simulations, num_particles) representing the updated speeds of the particles for each simulation.
         """
 
-        #-------- Gradient of the potential energy --------
-        forces = -np.dot(self.J, positions.T).T * self.ksi + self.H * positions
+        #-------- Gradient of the potential energy -------- Pourquoi ca ???  
+        forces = -np.dot(self.J, positions.T).T * self.ksi + self.H #* positions
         
         #-------- For CIM amplitude dynamics --------
-        # forces += (-1 + self.pumping_rate(t) - np.square(positions)) * positions
+        forces += (-1 + self.pumping_rate(t) - np.square(positions)) * positions
 
         #-------- For b(alistic)SB simulation  dynamics --------
-        forces += (-1 + self.pumping_rate(t)) * positions
+        # forces += (-1 + self.pumping_rate(t)) * positions  Quand on l'utilise on doit ajouter un facteur de temperture 
 
         #-------- For d(iscrete)SB simulatio  dynamics --------
         # forces = -np.dot(self.J, np.sign(positions).T).T * self.ksi + (-1 + self.pumping_rate(t)) * positions # for d(iscrete)SB simulation
